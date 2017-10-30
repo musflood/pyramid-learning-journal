@@ -27,3 +27,7 @@ a.edit {
     font-size: 1.5rem;
     padding: 0rem .55rem;
 }
+
+time {
+    padding-top: 0.8rem; 
+}
