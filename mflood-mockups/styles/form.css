@@ -1,0 +1,17 @@
+input[name="title"] {
+    font-family: 'Poiret One', cursive;
+    font-weight: 800;
+    font-size: 2rem;
+}
+
+textarea[name="body"] {
+    min-height: 50vh
+}
+
+@media screen and (min-width: 576px) {
+
+    textarea[name="body"] {
+        min-height: 30vh
+    }
+
+}

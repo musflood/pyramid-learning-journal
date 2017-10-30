@@ -26,6 +26,18 @@
     background-color: #62c2d1;
 }
 
+.nav-link {
+    color: #fff;
+}
+
+.nav-link:hover {
+    color: #fff;
+}
+
+.nav-link.active {
+    color: #495057;
+}
+
 .new {
     padding-bottom: 0.35rem;
 }
