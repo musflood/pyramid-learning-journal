@@ -1,6 +1,12 @@
+.extra-top {
+    height: 75px;
+    top: -75px;
+}
+
 #logo {
     font-size: 2.5rem;
     line-height: 1;
+    top: 0.1rem;
 }
 
 #logo span {
@@ -28,6 +34,9 @@
 
 .nav-link {
     color: #fff;
+    font-family: 'Poiret One', cursive;
+    font-weight: 800;
+    font-size: 1.2rem;
 }
 
 .nav-link:hover {
@@ -44,8 +53,8 @@
 
 @media screen and (min-width: 576px) {
 
-    .new {
-        padding-bottom: 0.55rem;
+    .nav-link {
+        padding-bottom: 0.4rem;
     }
     
 }
