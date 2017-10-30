@@ -23,10 +23,6 @@ html {
     line-height: 1;
 }
 
-.new {
-    padding-bottom: 0.35rem;
-}
-
 .nav-tabs .nav-link {
     border-color: #62c2d1 #62c2d1 #ddd;
 }
@@ -35,6 +31,9 @@ html {
     background-color: #62c2d1;
 }
 
+.new {
+    padding-bottom: 0.35rem;
+}
 
 @media screen and (min-width: 576px) {
 
@@ -44,10 +43,21 @@ html {
     
 }
 
+.card-text {
+    overflow: hidden;
+    height: 50vh
+}
+
+@media screen and (min-width: 576px) {
+
+    .card-text {
+
+        height: 30vh;
+    }
+    
+}
+
 footer.footer {
-    position: absolute;
     bottom: 0;
-    width: 100%;
-    line-height: 1;
 }
 
