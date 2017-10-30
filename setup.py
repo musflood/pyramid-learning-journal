@@ -30,7 +30,7 @@ tests_require = [
 setup(
     name='pyramid_learning_journal',
     version='0.0',
-    description='Megan Flood's Learning Journal',
+    description='Megan Flood\'s Learning Journal',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
         'Programming Language :: Python',
