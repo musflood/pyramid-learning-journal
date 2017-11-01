@@ -1,9 +1,8 @@
 from pyramid.response import Response
 import os
 
-HERE = os.path.abspath(__file__)
-STATIC = os.path.join(os.path.dirname(os.path.dirname(HERE)), 'static')
-TEMPLATES = os.path.join(os.path.dirname(os.path.dirname(HERE)), 'templates')
+HERE = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES = os.path.join(HERE, '../templates')
 
 
 def list_view(request):
