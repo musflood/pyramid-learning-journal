@@ -19,7 +19,7 @@ def test_list_view_returns_response(dummy_request):
 
 
 def test_list_view_responds_with_200_status_code(dummy_request):
-    """Test that our list view res[onds with a proper 200 status code."""
+    """Test that our list view responds with a proper 200 status code."""
     from pyramid_learning_journal.views.default import list_view
     assert list_view(dummy_request).status_code == 200
 
