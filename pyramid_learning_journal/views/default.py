@@ -14,14 +14,17 @@ def list_view(request):
 
 def detail_view(request):
     """A single journal entry."""
-    pass
+    with open(os.path.join(TEMPLATES, 'detail.html')) as file:
+        return Response(file.read())
 
 
 def create_view(request):
     """Create a new entry."""
-    pass
+    with open(os.path.join(TEMPLATES, 'new.html')) as file:
+        return Response(file.read())
 
 
 def update_view(request):
     """Update an existing entry."""
-    pass
+    with open(os.path.join(TEMPLATES, 'edit.html')) as file:
+        return Response(file.read())
