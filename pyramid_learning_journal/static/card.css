@@ -1,0 +1,34 @@
+.card-text {
+    overflow: hidden;
+    height: 50vh
+}
+
+.card-text.detail {
+    overflow: auto;
+    height: auto;
+    min-height: 50vh
+}
+
+@media screen and (min-width: 576px) {
+
+    .card-text {
+
+        height: 30vh;
+    }
+
+    .card-text.detail {
+        height: auto;
+        min-height: 30vh;
+    }
+    
+}
+
+a.edit {
+    font-size: 1.5rem;
+    padding: 0rem .55rem;
+    margin-top: 0.1rem
+}
+
+time {
+    padding-top: 0.8rem; 
+}
