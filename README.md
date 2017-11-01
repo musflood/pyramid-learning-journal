@@ -6,6 +6,7 @@
 
 ## Overview
 Blog created with Pyramid for recording a Learning Journal of Code 401: Python
+
 Deployed on Heroku: https://mus-learning-journal.herokuapp.com/
 
 ## Routes
