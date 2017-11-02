@@ -4,6 +4,7 @@
 from datetime import datetime
 
 FMT = "%m/%d/%Y %I:%M %p"
+
 ENTRIES = [
     {
         'id': 1,
@@ -89,7 +90,7 @@ definitions is super awesome! Especially the * for any number of arguments
     'title': "Day Ten",
     'creation_date': datetime.strptime('10/27/2017 10:59 PM', FMT),
     'body': """<p>So much os. Basically worked on step 3 of the server all day today, and were nearly done! Main issue was just that we had to research how to do everything. This wasn't a bad thing, just time consuming.</p>
-<p>Next up, asynchonicity.</p>"""
+<p>Next up, asynchronicity.</p>"""
     },
     {
     'id': 11,
@@ -104,7 +105,11 @@ definitions is super awesome! Especially the * for any number of arguments
     'creation_date': datetime.strptime('10/31/2017 9:35 PM', FMT),
     'body': """<p>Jinja is great! Much of the functionality is an improved version of Handlebars, which is my only point of reference for templating. The fact that you can access the request object inside of the template is fantastic. That should make it much easier to dynamically populate various things, like links etc.</p>
 <p>Finally got to a new data structure, the binary heap. I have never made a heap before but, since we are using a list to store the values instead of nodes, it is much easier to operate on than the binary tree that I learned about before. Yay, no recursion.</p>"""
+    },
+    {
+    'creation_date': datetime.strptime('11/01/2017 10:16 PM', FMT),
+    'title': "Day Thrirteen",
+    'body': "<p>SQLAlchemy, all of the Postgres with none of the SQL!</p> <p>It is very interesting to interact with a database simply by interacting normally with objects. Definitely need to remember to add and commit changes made in order to actually change the database. This should make it much easier to make complicated queries to the database. Although I think that the reason why it was especially difficult in Node was that everything was asynchronous, which is not the case in Python.</p> <p>I am curious how to implement other types of requests through Pyramid. Besides get requests through anchor tag links, we haven't had much interaction with the front-end side of the web site. I wonder if we just have routes that execute the different requests, like when using Page.js...</p>",
+    'id': 13
     }
-
-
 ]

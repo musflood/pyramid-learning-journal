@@ -18,9 +18,10 @@ def detail_view(request):
     entry_id = int(request.matchdict['id'])
     if entry_id < 0 or entry_id > len(entry_history.ENTRIES):
         raise HTTPNotFound
+
     entry = list(filter(lambda entry: entry['id'] == entry_id, entry_history.ENTRIES))[0]
     return {
-        "page_title": "Entry Detail",
+        "page_title": entry['title'],
         "entry": entry
     }
 
@@ -41,6 +42,6 @@ def update_view(request):
         raise HTTPNotFound
     entry = list(filter(lambda entry: entry['id'] == entry_id, entry_history.ENTRIES))[0]
     return {
-        "page_title": "Edit Entry",
+        "page_title": "Edit '{}'".format(entry['title']),
         "entry": entry
     }

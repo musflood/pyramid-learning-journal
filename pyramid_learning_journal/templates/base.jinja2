@@ -23,7 +23,7 @@
         <nav class="fixed-top w-100">
             <ul class="nav nav-tabs pt-2 px-2 bg-info">
                 <li class="nav-item">
-                    <a class="nav-link active py-0 my-0" href="{{ request.route_url('home') }}">
+                    <a class="nav-link py-0 my-0 {% if 'New' not in page_title %}active{% endif %}" href="{{ request.route_url('home') }}">
                         <span class="ion-ios-bookmarks-outline position-relative" id="logo">
                             <span class="ion-social-python position-absolute"></span>
                         </span>
@@ -32,7 +32,7 @@
 
                 </li>
                 <li class="ml-auto nav-item">
-                    <a class="nav-link new" href="{{ request.route_url('create') }}">
+                    <a class="nav-link new {% if 'New' in page_title %}active{% endif %}" href="{{ request.route_url('create') }}">
                         <span class="d-none d-sm-inline">New</span>
                         <span class="ion-ios-plus-outline d-inline d-sm-none"></span>
                     </a>
