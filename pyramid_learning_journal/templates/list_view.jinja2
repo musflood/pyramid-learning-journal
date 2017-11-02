@@ -1,20 +1,18 @@
 {% extends "base.jinja2" %}
 
 {% block content %}
- <div class="card mb-5">
-    <div class="card-header bg-white">
-        <h2 class="card-title mb-1">Lorem Ipsum</h2>
-    </div>
-    <div class="card-body">
-        <div class="card-text mb-3">
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus nulla ligula, elementum consequat arcu quis, convallis feugiat tortor. Cras facilisis vitae ligula faucibus tincidunt. Duis convallis fringilla varius. Ut ut dolor et nibh consectetur luctus. Aliquam accumsan, magna in ornare commodo, libero ex posuere urna, ac ultrices mauris nibh ac velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In hac habitasse platea dictumst. Vestibulum ullamcorper lacus placerat ipsum hendrerit posuere in quis lectus. Vivamus dui ante, lobortis eget nisi in, dignissim rhoncus lectus.
-            </p>
-        </div>
-        
-        <time class="card-subtitle text-muted float-left d-sm-inline pb-3 pb-sm-0">Saturday, 28 October, 2017, 12:42 pm</time>
-        <a href="/journal/1" class="btn btn-outline-warning float-right col col-sm-auto">Read more</a>
-        
-    </div>
-</div> <!-- end of card -->
+    {% for entry in entries %}
+         <div class="card mb-5">
+            <div class="card-header bg-white">
+                <h2 class="card-title mb-1">{{ entry.title }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="card-text mb-3">
+                    {{ entry.body|safe }}
+                </div>         
+                <time class="card-subtitle text-muted float-left d-sm-inline pb-3 pb-sm-0">{{ entry.creation_date }}</time>
+                <a href="{{ request.route_url('detail', id=entry.id) }}" class="btn btn-outline-warning float-right col col-sm-auto">Read more</a>
+            </div>
+        </div> <!-- end of card -->
+    {% endfor %}
 {% endblock content %}

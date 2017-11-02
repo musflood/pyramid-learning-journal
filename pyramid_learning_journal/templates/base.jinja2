@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Python Learning Journal | Home</title>
+        <title>Python Learning Journal | {{ page_title }}</title>
 
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -12,17 +12,17 @@
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Poiret+One|Maven+Pro:400,500" rel="stylesheet">
         <!-- Personal Stylesheets -->
-        <link rel="stylesheet" type="text/css" href="/static/base.css">
-        <link rel="stylesheet" type="text/css" href="/static/nav.css">
-        <link rel="stylesheet" type="text/css" href="/static/card.css">
-        <link rel="stylesheet" type="text/css" href="/static/footer.css">
+        <link rel="stylesheet" type="text/css" href="{{ request.static_path('pyramid_learning_journal:static/base.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ request.static_path('pyramid_learning_journal:static/nav.css') }}">  
+        <link rel="stylesheet" type="text/css" href="{{ request.static_path('pyramid_learning_journal:static/card.css') }}">  
+        <link rel="stylesheet" type="text/css" href="{{ request.static_path('pyramid_learning_journal:static/footer.css') }}">
     </head>
     <body>
         <div class="bg-info fixed-top extra-top"></div>
         <nav class="fixed-top w-100">
             <ul class="nav nav-tabs pt-2 px-2 bg-info">
                 <li class="nav-item">
-                    <a class="nav-link active py-0 my-0" href="/">
+                    <a class="nav-link active py-0 my-0" href="{{ request.route_url('home') }}">
                         <span class="ion-ios-bookmarks-outline position-relative" id="logo">
                             <span class="ion-social-python position-absolute"></span>
                         </span>
@@ -31,7 +31,7 @@
 
                 </li>
                 <li class="ml-auto nav-item">
-                    <a class="nav-link new" href="/journal/new-entry">
+                    <a class="nav-link new" href="{{ request.route_url('create') }}">
                         <span class="d-none d-sm-inline">New</span>
                         <span class="ion-ios-plus-outline d-inline d-sm-none"></span>
                     </a>
