@@ -25,11 +25,22 @@ def detail_view(request):
     }
 
 
+@view_config(route_name='create', renderer='pyramid_learning_journal:templates/create.jinja2')
 def create_view(request):
     """Create a new entry."""
-    pass
+    return {
+        "page_title": "New Entry"
+    }
 
 
+@view_config(route_name='edit', renderer='pyramid_learning_journal:templates/edit.jinja2')
 def update_view(request):
     """Update an existing entry."""
-    pass
+    entry_id = int(request.matchdict['id'])
+    if entry_id < 0 or entry_id > len(entry_history.ENTRIES):
+        raise HTTPNotFound
+    entry = list(filter(lambda entry: entry['id'] == entry_id, entry_history.ENTRIES))[0]
+    return {
+        "page_title": "Edit Entry",
+        "entry": entry
+    }

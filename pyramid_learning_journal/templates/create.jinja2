@@ -1,0 +1,19 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <form>
+        <div class="card mb-3">
+            <div class="card-header bg-white">
+                <input type="text" name="title" placeholder="Title" class="form-control border-light bg-light">
+            </div>
+            <div class="card-body">
+                <div class="card-text detail">
+                    <textarea name="body" placeholder="Write a new entry..." class="form-control border-light bg-light"></textarea>
+                </div>
+            </div>
+        </div> <!-- end of card -->
+        <div class="row justify-content-center mx-0">
+            <button type="submit" class="btn btn-warning col col-sm-4">Create</button>
+        </div>
+    </form>
+{% endblock content %}
