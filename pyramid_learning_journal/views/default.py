@@ -1,29 +1,22 @@
-from pyramid.response import Response
-import os
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-TEMPLATES = os.path.join(HERE, '../templates')
+from pyramid.view import view_config
 
 
+@view_config(route_name='home', renderer='pyramid_learning_journal:templates/list_view.jinja2')
 def list_view(request):
     """List of journal entries."""
-    with open(os.path.join(TEMPLATES, 'index.html')) as file:
-        return Response(file.read())
+    pass
 
 
 def detail_view(request):
     """A single journal entry."""
-    with open(os.path.join(TEMPLATES, 'detail.html')) as file:
-        return Response(file.read())
+    pass
 
 
 def create_view(request):
     """Create a new entry."""
-    with open(os.path.join(TEMPLATES, 'new.html')) as file:
-        return Response(file.read())
+    pass
 
 
 def update_view(request):
     """Update an existing entry."""
-    with open(os.path.join(TEMPLATES, 'edit.html')) as file:
-        return Response(file.read())
+    pass
