@@ -41,7 +41,7 @@
 
         <main class="my-5 py-5">
 
-            <div class="container justify-content-sm-center pt-3 col-sm-10 pt-sm-5 col-md-8 col-lg-6 mt-lg-4">
+            <div class="container justify-content-sm-center col-sm-10 col-md-8 col-lg-6 {% if page_title == 'Home' %} pt-3 pt-sm-5 mt-lg-4 {% endif %}">
 
             {% block content %}{% endblock %}      
 
