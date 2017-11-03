@@ -40,6 +40,7 @@ def update_view(request):
     entry_id = int(request.matchdict['id'])
     if entry_id < 0 or entry_id > len(entry_history.ENTRIES):
         raise HTTPNotFound
+    
     entry = list(filter(lambda entry: entry['id'] == entry_id, entry_history.ENTRIES))[0]
     return {
         "page_title": "Edit '{}'".format(entry['title']),

@@ -1,4 +1,4 @@
-"""List of all learing journal entries."""
+"""List of all learning journal entries."""
 
 
 from datetime import datetime
