@@ -28,12 +28,28 @@ def test_detail_entry_returns_one_detail_entry_in_dict(dummy_request):
     assert isinstance(response['entry'], dict)
 
 
+def test_error_handling_in_detail_view(dummy_request):
+    """Test that the on HTTPNotFound is raised if not found."""
+    from pyramid_learning_journal.views.default import detail_view
+    dummy_request.matchdict['id'] = 99
+    with pytest.raises(HTTPNotFound):
+        detail_view(dummy_request)
+
+
 def test_create_entry_returns_a_response_for_new_entry(dummy_request):
     """Test that the new entry function returns a value from a new item."""
     from pyramid_learning_journal.views.default import create_view
     response = create_view(dummy_request)
     assert 'page_title' in response
     assert 'New Entry' == response['page_title']
+
+
+def test_error_handling_in_update_view(dummy_request):
+    """Test that the on HTTPNotFound is raised if not found."""
+    from pyramid_learning_journal.views.default import update_view
+    dummy_request.matchdict['id'] = 99
+    with pytest.raises(HTTPNotFound):
+        update_view(dummy_request)
 
 
 def test_update_view_returns_list_of_entries_in_dict(dummy_request):
@@ -62,24 +78,30 @@ def testapp():
     return TestApp(app)
 
 
-def test_home_route_has_table(testapp):
-    """Test that the home route has a table."""
+def test_home_route_has_all_journal_entries(testapp):
+    """Test that the home route all journal entries."""
     from pyramid_learning_journal.data.entry_history import ENTRIES
     response = testapp.get("/")
     assert len(ENTRIES) == len(response.html.find_all('div', 'card'))
 
 
-def test_error_handling_in_detail_view(dummy_request):
-    """Test that the on HTTPNotFound is raised if not found."""
-    from pyramid_learning_journal.views.default import detail_view
-    dummy_request.matchdict['id'] = 99
-    with pytest.raises(HTTPNotFound):
-        detail_view(dummy_request)
+def test_deatil_route_has_one_entry(testapp):
+    """Test that the detail_view shows one journal entry."""
+    from pyramid_learning_journal.data.entry_history import ENTRIES
+    response = testapp.get("/journal/1")
+    assert len(response.html.find_all('div', 'card')) == 1
+    assert ENTRIES[0]['title'] in response.text
 
 
-def test_error_handling_in_update_view(dummy_request):
-    """Test that the on HTTPNotFound is raised if not found."""
-    from pyramid_learning_journal.views.default import update_view
-    dummy_request.matchdict['id'] = 99
-    with pytest.raises(HTTPNotFound):
-        update_view(dummy_request)
+def test_create_view_has_a_create_button(testapp):
+    """Test that the Create page has a 'Create' button."""
+    response = testapp.get("/journal/new-entry")
+    assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
+    assert "Create" in response.html.find('button', attrs={"type": "submit"})
+
+
+def test_update_view_has_an_update_button(testapp):
+    """Test that the Update page has a 'Update' button."""
+    response = testapp.get("/journal/1/edit-entry")
+    assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
+    assert "Update" in response.html.find('button', attrs={"type": "submit"})
