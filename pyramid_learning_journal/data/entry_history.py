@@ -11,7 +11,7 @@ ENTRIES = [
         'title': "Day One",
         'creation_date': datetime.strptime('10/16/2017 4:18 PM', FMT),
         'body': "Finally starting 401! Super excited to finally start \
-        learning brand new material for Python!\n\nSo far just a brief overview of the course and some of the basic basics of \
+learning brand new material for Python!\n\nSo far just a brief overview of the course and some of the basic basics of \
 how to write Python, not much new on that front. The built-in function 'dir' \
 seems like it should be very useful, especially if you are working with other \
 people's modules. It would be a quick way to determine the various methods or \
