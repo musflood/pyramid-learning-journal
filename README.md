@@ -42,5 +42,6 @@ Coverage for view functions at 100%.
 
 ## Change Log
 **11-3-2017 6:19pm** - Templating for all pages using Jinja2, pages are now dynamically filled.
+
 **10-31-2017 10:25pm** - All pages are static, but successfully deployed to Heroku.
 
