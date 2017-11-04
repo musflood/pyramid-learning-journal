@@ -1,0 +1,18 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <div class="card mb-5">
+        <div class="card-header bg-white">
+            <a class="ion-android-create btn btn-outline-warning rounded-circle float-right edit" href="{{ request.route_url('edit', id=entry.id) }}"></a>
+            <h2 class="card-title mb-1">{{ entry.title }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="card-text detail mb-3">
+                {{ entry.body|safe }}
+            </div>
+            
+            <time class="card-subtitle text-muted align-text-bottom float-left d-sm-inline py-3 pb-sm-0">{{ entry.creation_date }}</time>
+            
+        </div>
+    </div> <!-- end of card -->
+{% endblock content %}

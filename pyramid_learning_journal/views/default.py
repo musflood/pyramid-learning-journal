@@ -1,29 +1,48 @@
-from pyramid.response import Response
-import os
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-TEMPLATES = os.path.join(HERE, '../templates')
+from pyramid.view import view_config
+from pyramid_learning_journal.data import entry_history
+from pyramid.exceptions import HTTPNotFound
 
 
+@view_config(route_name='home', renderer='pyramid_learning_journal:templates/list_view.jinja2')
 def list_view(request):
     """List of journal entries."""
-    with open(os.path.join(TEMPLATES, 'index.html')) as file:
-        return Response(file.read())
+    return {
+        "entries": sorted(entry_history.ENTRIES, key=lambda e: -e['id']),
+        "page_title": "Home"
+    }
 
 
+@view_config(route_name='detail', renderer='pyramid_learning_journal:templates/detail.jinja2')
 def detail_view(request):
     """A single journal entry."""
-    with open(os.path.join(TEMPLATES, 'detail.html')) as file:
-        return Response(file.read())
+    entry_id = int(request.matchdict['id'])
+    if entry_id < 0 or entry_id > len(entry_history.ENTRIES):
+        raise HTTPNotFound
+
+    entry = list(filter(lambda entry: entry['id'] == entry_id, entry_history.ENTRIES))[0]
+    return {
+        "page_title": entry['title'],
+        "entry": entry
+    }
 
 
+@view_config(route_name='create', renderer='pyramid_learning_journal:templates/create.jinja2')
 def create_view(request):
     """Create a new entry."""
-    with open(os.path.join(TEMPLATES, 'new.html')) as file:
-        return Response(file.read())
+    return {
+        "page_title": "New Entry"
+    }
 
 
+@view_config(route_name='edit', renderer='pyramid_learning_journal:templates/edit.jinja2')
 def update_view(request):
     """Update an existing entry."""
-    with open(os.path.join(TEMPLATES, 'edit.html')) as file:
-        return Response(file.read())
+    entry_id = int(request.matchdict['id'])
+    if entry_id < 0 or entry_id > len(entry_history.ENTRIES):
+        raise HTTPNotFound
+    
+    entry = list(filter(lambda entry: entry['id'] == entry_id, entry_history.ENTRIES))[0]
+    return {
+        "page_title": "Edit '{}'".format(entry['title']),
+        "entry": entry
+    }
