@@ -31,7 +31,10 @@ class Entry(Base):
 
     def to_dict(self):
         """Take all model attributes and render them as a dictionary."""
-        local_creation_date = self.creation_date.astimezone(tz('US/Pacific'))
+        local_creation_date = self.creation_date
+        if self.creation_date.tzinfo:
+            local_creation_date = local_creation_date.astimezone(tz('US/Pacific'))
+
         return {
             'id': self.id,
             'title': self.title,
