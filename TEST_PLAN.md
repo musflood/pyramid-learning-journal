@@ -24,6 +24,7 @@
      + Given incomplete data, raises HTTPBadRequest
      + Given complete data
          * new Entry is created
+         * new Entry has provided information
          * returns a 302 reponse code
          * returns a HTTPFound redirect to the home page
 
@@ -64,12 +65,12 @@
  + to_dict
      * All attributes added to dictionary
          - id, title, body, left as is
-         - creation_date, converted to pacific time
+         - creation_date, converted string
  + to_html_dict
      * All attributes added to dictionary
          - id, title, left as is
          - body, converted to HTML
-         - creation_date, converted to pacific time
+         - creation_date, converted string
 
 ## Functional Tests
 

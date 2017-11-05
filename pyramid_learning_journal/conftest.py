@@ -57,11 +57,17 @@ def dummy_request(db_session):
 
 
 @pytest.fixture
-def add_test_entry(dummy_request, test_entry):
+def add_entry(dummy_request, test_entry):
     """Create a new Entry and add to database."""
     dummy_request.dbsession.add(test_entry)
-    dummy_request.dbsession.commit()
     return test_entry
+
+
+@pytest.fixture
+def add_entries(dummy_request, test_entries):
+    """Create a new Entry and add to database."""
+    dummy_request.dbsession.add_all(test_entries)
+    return test_entries
 
 
 @pytest.fixture(scope="session")

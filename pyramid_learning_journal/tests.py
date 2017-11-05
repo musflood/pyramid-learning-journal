@@ -1,7 +1,7 @@
 """Tests for the pyramid_learning_journal package."""
 
 from __future__ import unicode_literals
-from pyramid.exceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPNotFound, HTTPFound, HTTPBadRequest
 from datetime import datetime
 from pytz import utc
 import pytest
@@ -98,7 +98,7 @@ def test_to_html_dict_converts_date_to_string(test_entry):
 """ UNIT TESTS FOR VIEW FUNCTIONS """
 
 
-def test_list_entries_returns_list_of_entries(dummy_request):
+def test_list_view_returns_list(dummy_request, add_entries):
     """Test that the list view function returns a list of the entries."""
     from pyramid_learning_journal.views.default import list_view
     response = list_view(dummy_request)
@@ -106,22 +106,39 @@ def test_list_entries_returns_list_of_entries(dummy_request):
     assert isinstance(response['entries'], list)
 
 
-def test_list_entries_returns_all_entries_in_list(dummy_request, add_test_entry):
-    """Test that the list view function returns all entries."""
+def test_list_view_returns_entries_in_list(dummy_request, add_entries):
+    """Test that the list view function returns entries as dicitonaries."""
     from pyramid_learning_journal.views.default import list_view
     response = list_view(dummy_request)
-    assert add_test_entry.to_html_dict() in response['entries']
+    assert add_entries[0].to_html_dict() in response['entries']
 
 
-def test_detail_entry_returns_one_entry_detail(dummy_request, add_test_entry):
+def test_list_view_returns_all_entries_in_db(dummy_request, add_entries):
+    """Test that the list view function returns all entries in database."""
+    from pyramid_learning_journal.views.default import list_view
+    from pyramid_learning_journal.models import Entry
+    response = list_view(dummy_request)
+    query = dummy_request.dbsession.query(Entry)
+    assert len(response['entries']) == query.count()
+
+
+def test_detail_view_returns_one_entry_detail(dummy_request, add_entries):
     """Test that the detail view function returns the data of one entry."""
     from pyramid_learning_journal.views.default import detail_view
     dummy_request.matchdict['id'] = 1
     response = detail_view(dummy_request)
-    assert add_test_entry.to_html_dict() == response['entry']
+    assert add_entries[0].to_html_dict() == response['entry']
 
 
-def test_error_handling_in_detail_view(dummy_request, add_test_entry):
+def test_detail_view_returns_correct_entry_detail(dummy_request, add_entries):
+    """Test that the detail view function returns the correct entry data."""
+    from pyramid_learning_journal.views.default import detail_view
+    dummy_request.matchdict['id'] = 1
+    response = detail_view(dummy_request)
+    assert response['entry']['id'] == 1
+
+
+def test_detail_view_raises_httpnotfound_for_bad_id(dummy_request, add_entries):
     """Test that detail_view raises HTTPNotFound if index out of bounds."""
     from pyramid_learning_journal.views.default import detail_view
     dummy_request.matchdict['id'] = 99
@@ -129,23 +146,92 @@ def test_error_handling_in_detail_view(dummy_request, add_test_entry):
         detail_view(dummy_request)
 
 
-def test_create_entry_returns_a_only_the_page_title(dummy_request):
-    """Test that the new entry function returns only page title."""
+def test_create_view_get_returns_only_the_page_title(dummy_request):
+    """Test that the new entry function returns only page title for GET."""
     from pyramid_learning_journal.views.default import create_view
     response = create_view(dummy_request)
     assert 'page_title' in response
     assert 'New Entry' == response['page_title']
 
 
-def test_update_view_returns_only_one_entry_detail(dummy_request, add_test_entry):
+def test_create_view_post_creates_new_entry(dummy_request):
+    """Test that the new entry is created on create_view POST."""
+    from pyramid_learning_journal.views.default import create_view
+    from pyramid_learning_journal.models import Entry
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+    create_view(dummy_request)
+    assert dummy_request.dbsession.query(Entry).count() == 1
+
+
+def test_create_view_post_creates_new_entry_with_given_info(dummy_request):
+    """Test that new entry created uses POST info on create_view POST."""
+    from pyramid_learning_journal.views.default import create_view
+    from pyramid_learning_journal.models import Entry
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+    create_view(dummy_request)
+    entry = dummy_request.dbsession.query(Entry).get(1)
+    assert entry.title == entry_data['title']
+    assert entry.body == entry_data['body']
+
+
+def test_create_view_post_has_302_status_code(dummy_request):
+    """Test that create_view POST has 302 status code."""
+    from pyramid_learning_journal.views.default import create_view
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+    response = create_view(dummy_request)
+    assert response.status_code == 302
+
+
+def test_create_view_post_redirects_to_home_with_httpfound(dummy_request):
+    """Test that create_view POST redirects to home with httpfound."""
+    from pyramid_learning_journal.views.default import create_view
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+    response = create_view(dummy_request)
+    assert isinstance(response, HTTPFound)
+    assert response.location == dummy_request.route_url('home')
+
+
+def test_create_view_post_incompelete_data_is_bad_request(dummy_request):
+    """Test that create_view POST with incomplete data is invalid."""
+    from pyramid_learning_journal.views.default import create_view
+    entry_data = {
+        'title': 'not fun times'
+    }
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+    with pytest.raises(HTTPBadRequest):
+        create_view(dummy_request)
+
+
+def test_update_view_returns_only_one_entry_detail(dummy_request, add_entries):
     """Test that the Update view function returns one entry by id."""
     from pyramid_learning_journal.views.default import update_view
     dummy_request.matchdict['id'] = 1
     response = update_view(dummy_request)
-    assert add_test_entry.to_dict() == response['entry']
+    assert add_entries[0].to_dict() == response['entry']
 
 
-def test_error_handling_in_update_view(dummy_request, add_test_entry):
+def test_update_view_raises_httpnotfound_for_bad_id(dummy_request, add_entries):
     """Test that update_view raises HTTPNotFound if index out of bounds."""
     from pyramid_learning_journal.views.default import update_view
     dummy_request.matchdict['id'] = 99
@@ -153,7 +239,7 @@ def test_error_handling_in_update_view(dummy_request, add_test_entry):
         update_view(dummy_request)
 
 
-def test_error_handling_in_delete_journal_entry(dummy_request, add_test_entry):
+def test_delete_entry_raises_httpnotfound_for_bad_id(dummy_request, add_entries):
     """Test that delete_journal_entry raises HTTPNotFound for a GET rquest."""
     from pyramid_learning_journal.views.default import delete_journal_entry
     dummy_request.matchdict['id'] = 99
