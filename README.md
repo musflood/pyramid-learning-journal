@@ -35,12 +35,12 @@ $ pserve development.ini --reload
 Written in Python, with pytest for testing. Uses the web framework Pyramid with a scaffold built with the Cookiecutter pyramid-cookiecutter-alchemy. Deployed with Heroku.
 
 All tests passing in Python 2 and 3.
-Coverage for view functions at 100%.
 
 ## Contributors
 [Michael Shinners](https://github.com/mshinners) - Help building out the site using Pyramid
 
 ## Change Log
-**11-3-2017 6:19pm** - Templating for all pages using Jinja2, pages are now dynamically filled.
-**10-31-2017 10:25pm** - All pages are static, but successfully deployed to Heroku.
+**11-3-2017 6:19pm** - Templating for all pages using Jinja2, pages are now dynamically filled. View has 100% coverage on Python 2 and 3.
+
+**10-31-2017 10:25pm** - All pages are static, but successfully deployed to Heroku. View has 100% coverage on Python 2 and 3.
 
