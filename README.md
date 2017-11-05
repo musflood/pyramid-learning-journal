@@ -38,5 +38,5 @@ Written in Python, with pytest for testing. Uses the web framework Pyramid with 
 [Michael Shinners](https://github.com/mshinners) - Help building out the site using Pyramid
 
 ## Change Log
-10-31-2017 10:25pm - All pages are static, but successfully deployed to Heroku.
+10-31-2017 10:25pm - All pages are static, but successfully deployed to Heroku. View has 100% coverage on Python 2 and 3.
 
