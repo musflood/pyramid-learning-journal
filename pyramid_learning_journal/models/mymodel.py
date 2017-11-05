@@ -8,6 +8,7 @@ from sqlalchemy import (
 from .meta import Base
 from datetime import datetime
 from markdown import markdown
+from pytz import timezone as tz
 
 
 class Entry(Base):
@@ -24,7 +25,7 @@ class Entry(Base):
         super(Entry, self).__init__(*args, **kwargs)
         self.creation_date = creation_date
         if not creation_date:
-            self.creation_date = datetime.now()
+            self.creation_date = datetime.now(tz('US/Pacific'))
 
     def to_dict(self):
         """Take all model attributes and render them as a dictionary."""
