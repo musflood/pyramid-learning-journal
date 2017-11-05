@@ -1,7 +1,7 @@
 {% extends "base.jinja2" %}
 
 {% block content %}
-    <form>
+    <form method='POST'>
         <div class="card mb-3">
             <div class="card-header bg-white">
                 <input type="text" name="title" placeholder="Title" value="{{ entry.title }}" class="form-control border-light bg-light">
@@ -18,10 +18,12 @@
 
             <div class="w-100 d-sm-none pb-4 pb-sm-0"></div>
 
-            <button type="button" name="delete" class="btn btn-outline-danger btn-sm col-4 col-sm-auto trash">
-                <span class="d-inline d-sm-none">Delete</span>
-                <span class="ion-ios-trash-outline d-none d-sm-inline"></span>
-            </button>
+            <a ping="{{ request.route_url('delete', id=entry.id) }}" href="{{ request.route_url('home') }}">
+                <button type="button" name="delete" class="btn btn-outline-danger btn-sm col-4 col-sm-auto trash">
+                    <span class="d-inline d-sm-none">Delete</span>
+                    <span class="ion-ios-trash-outline d-none d-sm-inline"></span>
+                </button>
+            </a>
         </div>
     </form>
 {% endblock content %}

@@ -1,5 +1,5 @@
 from pyramid.view import view_config
-from pyramid.exceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPNotFound, HTTPFound, HTTPBadRequest
 from pyramid_learning_journal.models import Entry
 
 
@@ -33,9 +33,20 @@ def detail_view(request):
 @view_config(route_name='create', renderer='pyramid_learning_journal:templates/create.jinja2')
 def create_view(request):
     """Create a new entry."""
-    return {
-        "page_title": "New Entry"
-    }
+    if request.method == 'GET':
+        return {
+            "page_title": "New Entry"
+        }
+
+    if request.method == 'POST':
+        if not all([field in request.POST for field in ['title', 'body']]):
+            raise HTTPBadRequest
+        new_entry = Entry(
+            title=request.POST['title'],
+            body=request.POST['body']
+        )
+        request.dbsession.add(new_entry)
+        return HTTPFound(request.route_url('home'))
 
 
 @view_config(route_name='edit', renderer='pyramid_learning_journal:templates/edit.jinja2')
@@ -45,9 +56,36 @@ def update_view(request):
 
     entry = request.dbsession.query(Entry).get(entry_id)
 
-    if entry:
+    if not entry:
+        raise HTTPNotFound
+
+    if request.method == 'GET':
         return {
             "page_title": "Edit '{}'".format(entry.title),
             "entry": entry.to_dict()
         }
-    raise HTTPNotFound
+
+    if request.method == 'POST':
+        entry.title = request.POST['title']
+        entry.body = request.POST['body']
+        request.dbsession.add(entry)
+        request.dbsession.flush()
+        return HTTPFound(request.route_url('detail', id=entry_id))
+
+
+@view_config(route_name='delete')
+def delete_journal_entry(request):
+    """Delete a journal entry."""
+    entry_id = int(request.matchdict['id'])
+
+    entry = request.dbsession.query(Entry).get(entry_id)
+
+    if not entry:
+        raise HTTPNotFound
+
+    if request.method == 'GET':
+        raise HTTPNotFound
+
+    if request.method == 'POST':
+        request.dbsession.delete(entry)
+        return HTTPFound(request.route_url('home'))
