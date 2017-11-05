@@ -9,6 +9,7 @@ from .meta import Base
 from datetime import datetime
 from markdown import markdown
 from pytz import timezone as tz
+from pytz import utc
 
 
 class Entry(Base):
@@ -23,17 +24,19 @@ class Entry(Base):
     def __init__(self, creation_date=None, *args, **kwargs):
         """Initialize a new journal entry with current date."""
         super(Entry, self).__init__(*args, **kwargs)
-        self.creation_date = creation_date
-        if not creation_date:
-            self.creation_date = datetime.now(tz('US/Pacific'))
+        if creation_date:
+            self.creation_date = tz('US/Pacific').localize(creation_date)
+        else:
+            self.creation_date = datetime.now(utc)
 
     def to_dict(self):
         """Take all model attributes and render them as a dictionary."""
+        local_creation_date = self.creation_date.astimezone(tz('US/Pacific'))
         return {
             'id': self.id,
             'title': self.title,
             'body': self.body,
-            'creation_date': self.creation_date.strftime('%A, %B %d, %Y, %I:%M %p')
+            'creation_date': local_creation_date.strftime('%A, %B %d, %Y, %I:%M %p')
         }
 
     def to_html_dict(self):
