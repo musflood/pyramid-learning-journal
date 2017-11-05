@@ -9,6 +9,15 @@ import os
 import pytest
 
 
+@pytest.fixture
+def test_entry():
+    """Create a new Entry."""
+    return Entry(
+        title='test entry',
+        body='This is a test.'
+    )
+
+
 @pytest.fixture(scope='session')
 def configuration(request):
     """Setup a database for testing purposes."""
@@ -48,15 +57,11 @@ def dummy_request(db_session):
 
 
 @pytest.fixture
-def test_entry(dummy_request):
-    """Create a new Entry."""
-    new_entry = Entry(
-        title='test entry',
-        body='This is a test.'
-    )
-    dummy_request.dbsession.add(new_entry)
+def add_test_entry(dummy_request, test_entry):
+    """Create a new Entry and add to database."""
+    dummy_request.dbsession.add(test_entry)
     dummy_request.dbsession.commit()
-    return new_entry
+    return test_entry
 
 
 @pytest.fixture(scope="session")
