@@ -66,6 +66,8 @@ def update_view(request):
         }
 
     if request.method == 'POST':
+        if not all([field in request.POST for field in ['title', 'body']]):
+            raise HTTPBadRequest
         entry.title = request.POST['title']
         entry.body = request.POST['body']
         request.dbsession.add(entry)
@@ -76,14 +78,14 @@ def update_view(request):
 @view_config(route_name='delete')
 def delete_journal_entry(request):
     """Delete a journal entry."""
+    if request.method == 'GET':
+        raise HTTPNotFound
+
     entry_id = int(request.matchdict['id'])
 
     entry = request.dbsession.query(Entry).get(entry_id)
 
     if not entry:
-        raise HTTPNotFound
-
-    if request.method == 'GET':
         raise HTTPNotFound
 
     if request.method == 'POST':

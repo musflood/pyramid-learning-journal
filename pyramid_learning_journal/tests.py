@@ -223,7 +223,7 @@ def test_create_view_post_incompelete_data_is_bad_request(dummy_request):
         create_view(dummy_request)
 
 
-def test_update_view_returns_only_one_entry_detail(dummy_request, add_entries):
+def test_update_view_get_returns_only_one_entry_detail(dummy_request, add_entries):
     """Test that the Update view function returns one entry by id."""
     from pyramid_learning_journal.views.default import update_view
     dummy_request.matchdict['id'] = 1
@@ -231,7 +231,15 @@ def test_update_view_returns_only_one_entry_detail(dummy_request, add_entries):
     assert add_entries[0].to_dict() == response['entry']
 
 
-def test_update_view_raises_httpnotfound_for_bad_id(dummy_request, add_entries):
+def test_update_view_get_returns_correct_entry_details(dummy_request, add_entries):
+    """Test that the update view function returns the correct entry data."""
+    from pyramid_learning_journal.views.default import update_view
+    dummy_request.matchdict['id'] = 1
+    response = update_view(dummy_request)
+    assert response['entry']['id'] == 1
+
+
+def test_update_view_get_raises_httpnotfound_for_bad_id(dummy_request, add_entries):
     """Test that update_view raises HTTPNotFound if index out of bounds."""
     from pyramid_learning_journal.views.default import update_view
     dummy_request.matchdict['id'] = 99
@@ -239,10 +247,156 @@ def test_update_view_raises_httpnotfound_for_bad_id(dummy_request, add_entries):
         update_view(dummy_request)
 
 
-def test_delete_entry_raises_httpnotfound_for_bad_id(dummy_request, add_entries):
-    """Test that delete_journal_entry raises HTTPNotFound for a GET rquest."""
+def test_update_view_post_updates_entry(dummy_request, add_entry):
+    """Test that the entry is updated on update_view POST, not created."""
+    from pyramid_learning_journal.views.default import update_view
+    from pyramid_learning_journal.models import Entry
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    dummy_request.matchdict['id'] = 1
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+    update_view(dummy_request)
+    assert dummy_request.dbsession.query(Entry).count() == 1
+
+
+def test_update_view_post_updates_entry_with_given_info(dummy_request, add_entry):
+    """Test that entry updated uses POST info on update_view POST."""
+    from pyramid_learning_journal.views.default import update_view
+    from pyramid_learning_journal.models import Entry
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    dummy_request.matchdict['id'] = 1
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+
+    old_entry = dummy_request.dbsession.query(Entry).get(1).to_dict()
+    update_view(dummy_request)
+    entry = dummy_request.dbsession.query(Entry).get(1)
+    assert entry.title == entry_data['title']
+    assert entry.body == entry_data['body']
+    assert entry.title != old_entry['title']
+    assert entry.body != old_entry['body']
+
+
+def test_update_view_post_has_302_status_code(dummy_request, add_entry):
+    """Test that update_view POST has 302 status code."""
+    from pyramid_learning_journal.views.default import update_view
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    dummy_request.matchdict['id'] = 1
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+    response = update_view(dummy_request)
+    assert response.status_code == 302
+
+
+def test_update_view_post_redirects_to_detail_with_httpfound(dummy_request, add_entry):
+    """Test that update_view POST redirects to detail of id with httpfound."""
+    from pyramid_learning_journal.views.default import update_view
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    dummy_request.matchdict['id'] = 1
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+    response = update_view(dummy_request)
+    assert isinstance(response, HTTPFound)
+    assert response.location == dummy_request.route_url('detail', id=1)
+
+
+def test_update_view_post_incompelete_data_is_bad_request(dummy_request, add_entry):
+    """Test that update_view POST with incomplete data is invalid."""
+    from pyramid_learning_journal.views.default import update_view
+    entry_data = {
+        'title': 'not fun times'
+    }
+    dummy_request.matchdict['id'] = 1
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+    with pytest.raises(HTTPBadRequest):
+        update_view(dummy_request)
+
+
+def test_update_view_post_raises_httpnotfound_for_bad_id(dummy_request, add_entries):
+    """Test that update_view raises HTTPNotFound if index out of bounds."""
+    from pyramid_learning_journal.views.default import update_view
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    dummy_request.matchdict['id'] = 99
+    dummy_request.method = 'POST'
+    dummy_request.POST = entry_data
+    with pytest.raises(HTTPNotFound):
+        update_view(dummy_request)
+
+
+def test_delete_journal_entry_get_raises_httpnotfound(dummy_request, add_entries):
+    """Test that delete_journal_entry raises HTTPNotFound for a GET request."""
+    from pyramid_learning_journal.views.default import delete_journal_entry
+    dummy_request.matchdict['id'] = 1
+    with pytest.raises(HTTPNotFound):
+        delete_journal_entry(dummy_request)
+
+
+def test_delete_journal_entry_post_deletes_entry(dummy_request, add_entry):
+    """Test that the entry is deleted on delete_journal_entry POST."""
+    from pyramid_learning_journal.views.default import delete_journal_entry
+    from pyramid_learning_journal.models import Entry
+
+    assert dummy_request.dbsession.query(Entry).count() == 1
+    dummy_request.matchdict['id'] = 1
+    dummy_request.method = 'POST'
+    delete_journal_entry(dummy_request)
+    assert dummy_request.dbsession.query(Entry).count() == 0
+
+
+def test_delete_journal_entry_post_deletes_entry_with_id(dummy_request, add_entry):
+    """Test that entry deleted is the one with the given id."""
+    from pyramid_learning_journal.views.default import delete_journal_entry
+    from pyramid_learning_journal.models import Entry
+    entry = dummy_request.dbsession.query(Entry).all()[0]
+    assert entry.id == 1
+
+    dummy_request.matchdict['id'] = 1
+    dummy_request.method = 'POST'
+    delete_journal_entry(dummy_request)
+
+    assert entry not in dummy_request.dbsession.query(Entry).all()
+
+
+def test_delete_journal_entry_post_has_302_status_code(dummy_request, add_entry):
+    """Test that delete_journal_entry POST has 302 status code."""
+    from pyramid_learning_journal.views.default import delete_journal_entry
+    dummy_request.matchdict['id'] = 1
+    dummy_request.method = 'POST'
+    response = delete_journal_entry(dummy_request)
+    assert response.status_code == 302
+
+
+def test_delete_journal_entry_post_redirects_to_home_with_httpfound(dummy_request, add_entry):
+    """Test that delete_journal_entry POST redirects to home with httpfound."""
+    from pyramid_learning_journal.views.default import delete_journal_entry
+    dummy_request.matchdict['id'] = 1
+    dummy_request.method = 'POST'
+    response = delete_journal_entry(dummy_request)
+    assert isinstance(response, HTTPFound)
+    assert response.location == dummy_request.route_url('home')
+
+
+def test_delete_journal_entry_post_raises_httpnotfound_for_bad_id(dummy_request, add_entry):
+    """Test that delete_journal_entry POST raises HTTPNotFound for a invalid id."""
     from pyramid_learning_journal.views.default import delete_journal_entry
     dummy_request.matchdict['id'] = 99
+    dummy_request.method = 'POST'
     with pytest.raises(HTTPNotFound):
         delete_journal_entry(dummy_request)
 
