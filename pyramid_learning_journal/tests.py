@@ -1,62 +1,26 @@
-"""Unit tests basic response test for all view functions."""
+"""Tests for the pyramid_learning_journal package."""
 
 from __future__ import unicode_literals
 from pyramid.exceptions import HTTPNotFound
-from pyramid import testing
-from pyramid_learning_journal.models.meta import Base
-from pyramid_learning_journal.models import Entry, get_tm_session
-import transaction
 import pytest
 
 
-@pytest.fixture(scope='session')
-def configuration(request):
-    """Setup a database for testing purposes."""
-    config = testing.setUp(settings={
-        'sqlalchemy.url': 'postgres://localhost:5432/test-learning-journal'
-    })
-    config.include('pyramid_learning_journal.models')
-    config.include("pyramid_learning_journal.routes")
-
-    def teardown():
-        testing.tearDown()
-
-    request.addfinalizer(teardown)
-    return config
+""" UNIT TESTS FOR MODELS """
 
 
-@pytest.fixture
-def db_session(configuration, request):
-    """Create a database session for interacting with the test database."""
-    SessionFactory = configuration.registry['dbsession_factory']
-    session = SessionFactory()
-    engine = session.bind
-    Base.metadata.create_all(engine)
-
-    def teardown():
-        session.transaction.rollback()
-        Base.metadata.drop_all(engine)
-
-    request.addfinalizer(teardown)
-    return session
-
-
-@pytest.fixture
-def dummy_request(db_session):
-    """Create a dummy GET request with a dbsession."""
-    return testing.DummyRequest(dbsession=db_session)
-
-
-@pytest.fixture
-def test_entry(dummy_request):
-    """Create a new Entry."""
-    new_entry = Entry(
-        title='test entry',
-        body='This is a test.'
+def test_constructed_entry_with_no_date_added_to_database(db_session):
+    """Test that Entry constructed with no date gets added to the database."""
+    from pyramid_learning_journal.models import Entry
+    assert len(db_session.query(Entry).all()) == 0
+    entry = Entry(
+        title='test 1',
+        body='this is a test'
     )
-    dummy_request.dbsession.add(new_entry)
-    dummy_request.dbsession.commit()
-    return new_entry
+    db_session.add(entry)
+    assert len(db_session.query(Entry).all()) == 1
+
+
+""" UNIT TESTS FOR VIEW FUNCTIONS """
 
 
 def test_list_entries_returns_list_of_entries(dummy_request):
@@ -83,7 +47,7 @@ def test_detail_entry_returns_one_entry_detail(dummy_request, test_entry):
 
 
 def test_error_handling_in_detail_view(dummy_request, test_entry):
-    """Test that the on HTTPNotFound is raised if not found."""
+    """Test that detail_view raises HTTPNotFound if index out of bounds."""
     from pyramid_learning_journal.views.default import detail_view
     dummy_request.matchdict['id'] = 99
     with pytest.raises(HTTPNotFound):
@@ -107,59 +71,28 @@ def test_update_view_returns_only_one_entry_detail(dummy_request, test_entry):
 
 
 def test_error_handling_in_update_view(dummy_request, test_entry):
-    """Test that the on HTTPNotFound is raised if not found."""
+    """Test that update_view raises HTTPNotFound if index out of bounds."""
     from pyramid_learning_journal.views.default import update_view
     dummy_request.matchdict['id'] = 99
     with pytest.raises(HTTPNotFound):
         update_view(dummy_request)
 
 
-@pytest.fixture(scope="session")
-def testapp(request):
-    """Functional test for app."""
-    from webtest import TestApp
-    from pyramid.config import Configurator
-
-    def main():
-        settings = {
-            'sqlalchemy.url': 'postgres://localhost:5432/test-learning-journal'
-        }
-        config = Configurator(settings=settings)
-        config.include('pyramid_jinja2')
-        config.include('.routes')
-        config.include('.models')
-        config.scan()
-        return config.make_wsgi_app()
-
-    app = main()
-
-    SessionFactory = app.registry["dbsession_factory"]
-    engine = SessionFactory().bind
-    Base.metadata.create_all(bind=engine)
-
-    def tearDown():
-        Base.metadata.drop_all(bind=engine)
-
-    request.addfinalizer(tearDown)
-
-    return TestApp(app)
+def test_error_handling_in_delete_journal_entry(dummy_request, test_entry):
+    """Test that delete_journal_entry raises HTTPNotFound for a GET rquest."""
+    from pyramid_learning_journal.views.default import delete_journal_entry
+    dummy_request.matchdict['id'] = 99
+    with pytest.raises(HTTPNotFound):
+        delete_journal_entry(dummy_request)
 
 
-@pytest.fixture(scope='session')
-def fill_the_db(testapp):
-    """Fill the test database with dummy entries."""
-    SessionFactory = testapp.app.registry['dbsession_factory']
-    with transaction.manager:
-        dbsession = get_tm_session(SessionFactory, transaction.manager)
-        dbsession.add_all(ENTRIES)
-
-ENTRIES = [Entry(title='Day {}'.format(i), body='words ' * (i + 1)) for i in range(20)]
+""" FUNCTIONAL TESTS FOR ROUTES """
 
 
-def test_home_route_has_all_journal_entries(testapp, fill_the_db):
+def test_home_route_has_all_journal_entries(testapp, fill_the_db, test_entries):
     """Test that the home route all journal entries."""
     response = testapp.get("/")
-    assert len(ENTRIES) == len(response.html.find_all('div', 'card'))
+    assert len(test_entries) == len(response.html.find_all('div', 'card'))
 
 
 def test_deatil_route_has_one_entry(testapp):
