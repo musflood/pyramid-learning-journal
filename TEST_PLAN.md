@@ -88,9 +88,9 @@
          - has h1 tag with 'Oops'
      * Has one journal enry
          - count the cards
-         - check title is correct
+         - title is correct
 
-##### ceate - `/journal/new-entry`
+##### create - `/journal/new-entry`
  + GET
      * Has an empty form with a submit button
          - check value of inputs

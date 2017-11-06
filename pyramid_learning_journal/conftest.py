@@ -119,3 +119,27 @@ def fill_the_db(testapp, test_entries):
     with transaction.manager:
         dbsession = get_tm_session(SessionFactory, transaction.manager)
         dbsession.add_all(test_entries)
+
+
+@pytest.fixture
+def empty_the_db(testapp):
+    """Tear down the database and add a fresh table."""
+    SessionFactory = testapp.app.registry["dbsession_factory"]
+    engine = SessionFactory().bind
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+
+
+@pytest.fixture
+def testapp_session(testapp, request):
+    """Create a session to interact with the database."""
+    SessionFactory = testapp.app.registry["dbsession_factory"]
+    session = SessionFactory()
+    engine = session.bind
+
+    def teardown():
+        session.transaction.rollback()
+        Base.metadata.drop_all(engine)
+
+    request.addfinalizer(teardown)
+    return session

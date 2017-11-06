@@ -325,7 +325,7 @@ def test_update_view_post_incompelete_data_is_bad_request(dummy_request, add_ent
         update_view(dummy_request)
 
 
-def test_update_view_post_raises_httpnotfound_for_bad_id(dummy_request, add_entries):
+def test_update_view_post_raises_httpnotfound_for_bad_id(dummy_request, add_entry):
     """Test that update_view raises HTTPNotFound if index out of bounds."""
     from pyramid_learning_journal.views.default import update_view
     entry_data = {
@@ -347,19 +347,19 @@ def test_delete_journal_entry_get_raises_httpnotfound(dummy_request, add_entries
         delete_journal_entry(dummy_request)
 
 
-def test_delete_journal_entry_post_deletes_entry(dummy_request, add_entry):
+def test_delete_journal_entry_post_deletes_entry(dummy_request, add_entries):
     """Test that the entry is deleted on delete_journal_entry POST."""
     from pyramid_learning_journal.views.default import delete_journal_entry
     from pyramid_learning_journal.models import Entry
 
-    assert dummy_request.dbsession.query(Entry).count() == 1
+    assert dummy_request.dbsession.query(Entry).count() == len(add_entries)
     dummy_request.matchdict['id'] = 1
     dummy_request.method = 'POST'
     delete_journal_entry(dummy_request)
-    assert dummy_request.dbsession.query(Entry).count() == 0
+    assert dummy_request.dbsession.query(Entry).count() == len(add_entries) - 1
 
 
-def test_delete_journal_entry_post_deletes_entry_with_id(dummy_request, add_entry):
+def test_delete_journal_entry_post_deletes_entry_with_id(dummy_request, add_entries):
     """Test that entry deleted is the one with the given id."""
     from pyramid_learning_journal.views.default import delete_journal_entry
     from pyramid_learning_journal.models import Entry
@@ -373,7 +373,7 @@ def test_delete_journal_entry_post_deletes_entry_with_id(dummy_request, add_entr
     assert entry not in dummy_request.dbsession.query(Entry).all()
 
 
-def test_delete_journal_entry_post_has_302_status_code(dummy_request, add_entry):
+def test_delete_journal_entry_post_has_302_status_code(dummy_request, add_entries):
     """Test that delete_journal_entry POST has 302 status code."""
     from pyramid_learning_journal.views.default import delete_journal_entry
     dummy_request.matchdict['id'] = 1
@@ -382,7 +382,7 @@ def test_delete_journal_entry_post_has_302_status_code(dummy_request, add_entry)
     assert response.status_code == 302
 
 
-def test_delete_journal_entry_post_redirects_to_home_with_httpfound(dummy_request, add_entry):
+def test_delete_journal_entry_post_redirects_to_home_with_httpfound(dummy_request, add_entries):
     """Test that delete_journal_entry POST redirects to home with httpfound."""
     from pyramid_learning_journal.views.default import delete_journal_entry
     dummy_request.matchdict['id'] = 1
@@ -392,7 +392,7 @@ def test_delete_journal_entry_post_redirects_to_home_with_httpfound(dummy_reques
     assert response.location == dummy_request.route_url('home')
 
 
-def test_delete_journal_entry_post_raises_httpnotfound_for_bad_id(dummy_request, add_entry):
+def test_delete_journal_entry_post_raises_httpnotfound_for_bad_id(dummy_request, add_entries):
     """Test that delete_journal_entry POST raises HTTPNotFound for a invalid id."""
     from pyramid_learning_journal.views.default import delete_journal_entry
     dummy_request.matchdict['id'] = 99
@@ -410,22 +410,114 @@ def test_home_route_has_all_journal_entries(testapp, fill_the_db, test_entries):
     assert len(test_entries) == len(response.html.find_all('div', 'card'))
 
 
-def test_deatil_route_has_one_entry(testapp):
-    """Test that the detail_view shows one journal entry."""
+def test_detail_route_has_one_entry(testapp):
+    """Test that the detail route shows one journal entry."""
     response = testapp.get("/journal/1")
     assert len(response.html.find_all('div', 'card')) == 1
-    assert 'Day 0' in response.text
 
 
-def test_create_view_has_a_create_button(testapp):
+def test_detail_route_has_correct_entry(testapp):
+    """Test that the detail route shows correct journal entry."""
+    response = testapp.get("/journal/1")
+    assert 'Day 0' in response.html.find('h2')
+
+
+def test_detail_route_goes_to_404_page_for_invalid_id(testapp):
+    """Test that the detail route redirects to 404 page for invalid id."""
+    from webtest import AppError
+    with pytest.raises(AppError) as err:
+        testapp.get("/journal/-1")
+    assert '404' in err.value.args[0]
+    assert '<h1>Oops' in err.value.args[0]
+
+
+def test_update_get_route_has_an_update_button(testapp):
+    """Test that the Update page has a 'Update' button."""
+    response = testapp.get("/journal/1/edit-entry")
+    assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
+    assert "Update" in response.html.find('button', attrs={"type": "submit"})
+
+
+def test_create_get_route_has_empty_form(testapp):
+    """Test that the Create page has an empty form."""
+    response = testapp.get("/journal/new-entry")
+    assert len(response.html.find_all('input', attrs={"type": "text"})) == 1
+    assert 'value' not in response.html.find('input', attrs={"type": "text"})
+
+
+def test_create_get_route_has_a_create_button(testapp):
     """Test that the Create page has a 'Create' button."""
     response = testapp.get("/journal/new-entry")
     assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
     assert "Create" in response.html.find('button', attrs={"type": "submit"})
 
 
-def test_update_view_has_an_update_button(testapp):
-    """Test that the Update page has a 'Update' button."""
-    response = testapp.get("/journal/1/edit-entry")
-    assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
-    assert "Update" in response.html.find('button', attrs={"type": "submit"})
+def test_create_post_route_adds_a_new_entry(testapp, empty_the_db, testapp_session):
+    """Test that POST to create route creates a new entry."""
+    from pyramid_learning_journal.models import Entry
+    assert len(testapp_session.query(Entry).all()) == 0
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    testapp.post("/journal/new-entry", entry_data)
+    assert len(testapp_session.query(Entry).all()) == 1
+
+
+def test_create_post_route_has_a_302_status_code(testapp, empty_the_db):
+    """Test that POST to create route gets a 302 status code."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    response = testapp.post("/journal/new-entry", entry_data)
+    assert response.status_code == 302
+
+
+def test_create_post_route_redirects_to_home_route(testapp, empty_the_db):
+    """Test that POST to create route redirects to home route."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    response = testapp.post("/journal/new-entry", entry_data)
+    home = testapp.app.routes_mapper.get_route('home').path
+    assert response.location.endswith(home)
+
+
+def test_create_post_route_adds_new_entry_to_home(testapp, empty_the_db):
+    """Test that the new entry is on the home page after POST to create."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    response = testapp.post("/journal/new-entry", entry_data)
+    next_page = response.follow()
+    assert entry_data['title'] in next_page.html.find('h2')
+    assert entry_data['body'] in str(next_page.html.find('div', 'card-text'))
+
+
+def test_create_post_route_allows_access_to_detail_page(testapp, empty_the_db):
+    """Test that the new entry has an available detail page."""
+    from webtest import AppError
+    with pytest.raises(AppError):
+        testapp.get("/journal/1")
+
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    testapp.post("/journal/new-entry", entry_data)
+    testapp.get("/journal/1")
+
+
+def test_create_post_route_new_detail_page_has_new_info(testapp, empty_the_db):
+    """Test that the detail page for new entry has the correct info."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    testapp.post("/journal/new-entry", entry_data)
+    response = testapp.get("/journal/1")
+    assert entry_data['title'] in response.html.find('h2')
+    assert entry_data['body'] in str(response.html.find('div', 'card-text'))
