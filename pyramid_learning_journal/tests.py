@@ -454,6 +454,22 @@ def test_update_get_route_goes_to_404_page_for_invalid_id(testapp):
     assert '<h1>Oops' in err.value.args[0]
 
 
+def test_update_post_route_updates_correct_entry(testapp, testapp_session):
+    """Test that POST to update route updates a entry."""
+    from pyramid_learning_journal.models import Entry
+    entry_data = {
+        'title': 'so it begins',
+        'body': 'the beginning of change'
+    }
+    old_entry = testapp_session.query(Entry).get(1).to_dict()
+    testapp.post("/journal/1/edit-entry", entry_data)
+    entry = testapp_session.query(Entry).get(1)
+    assert entry.title == entry_data['title']
+    assert entry.body == entry_data['body']
+    assert entry.title != old_entry['title']
+    assert entry.body != old_entry['body']
+
+
 def test_update_post_route_has_a_302_status_code(testapp):
     """Test that POST to update route gets a 302 status code."""
     entry_data = {
@@ -502,8 +518,8 @@ def test_update_post_route_goes_to_404_page_for_invalid_id(testapp):
     """Test that the update POST route redirects to 404 page for invalid id."""
     from webtest import AppError
     entry_data = {
-        'title': 'fun times 16',
-        'body': 'all the fun, all the time. x 16'
+        'title': 'the end',
+        'body': 'last of the updates.'
     }
     with pytest.raises(AppError) as err:
         testapp.post("/journal/-1/edit-entry", entry_data)
@@ -511,20 +527,63 @@ def test_update_post_route_goes_to_404_page_for_invalid_id(testapp):
     assert '<h1>Oops' in err.value.args[0]
 
 
-def test_update_post_route_updates_correct_entry(testapp, testapp_session):
-    """Test that POST to update route updates a entry."""
+def test_delete_get_route_goes_to_404_page(testapp):
+    """Test that the delete GET route redirects to 404 page."""
+    from webtest import AppError
+    with pytest.raises(AppError) as err:
+        testapp.get("/journal/1/delete-entry")
+    assert '404' in err.value.args[0]
+    assert '<h1>Oops' in err.value.args[0]
+
+
+def test_delete_post_route_deletes_correct_entry(testapp, testapp_session):
+    """Test that POST to delete route deletes a entry."""
     from pyramid_learning_journal.models import Entry
-    entry_data = {
-        'title': 'the end',
-        'body': 'last of the updates.'
-    }
-    old_entry = testapp_session.query(Entry).get(1).to_dict()
-    testapp.post("/journal/1/edit-entry", entry_data)
     entry = testapp_session.query(Entry).get(1)
-    assert entry.title == entry_data['title']
-    assert entry.body == entry_data['body']
-    assert entry.title != old_entry['title']
-    assert entry.body != old_entry['body']
+    testapp.post("/journal/1/delete-entry")
+    assert entry not in testapp_session.query(Entry).all()
+
+
+def test_delete_post_route_has_a_302_status_code(testapp):
+    """Test that POST to delete route gets a 302 status code."""
+    response = testapp.post("/journal/2/delete-entry")
+    assert response.status_code == 302
+
+
+def test_delete_post_route_redirects_to_home_route(testapp):
+    """Test that POST to delete route redirects to home route."""
+    response = testapp.post("/journal/3/delete-entry")
+    home = testapp.app.routes_mapper.get_route('home').path
+    assert response.location.endswith(home)
+
+
+def test_delete_post_route_removes_entry_to_home(testapp, test_entries):
+    """Test that the entry is gone from the home page after POST to delete."""
+    response = testapp.post("/journal/4/delete-entry")
+    next_page = response.follow()
+    assert 'Day 3' not in next_page.html.find_all('h2')[-1]
+    assert len(next_page.html.find_all('h2')) == len(test_entries) - 4
+
+
+def test_delete_route_removes_detail_page_for_id(testapp):
+    """Test that the delete route also removes access to detail page for id."""
+    from webtest import AppError
+    testapp.get("/journal/5")
+    testapp.post("/journal/5/delete-entry")
+
+    with pytest.raises(AppError) as err:
+        testapp.get("/journal/5")
+    assert '404' in err.value.args[0]
+    assert '<h1>Oops' in err.value.args[0]
+
+
+def test_delete_post_route_goes_to_404_page_for_invalid_id(testapp):
+    """Test that the delete POST route redirects to 404 page for invalid id."""
+    from webtest import AppError
+    with pytest.raises(AppError) as err:
+        testapp.post("/journal/-1/delete-entry")
+    assert '404' in err.value.args[0]
+    assert '<h1>Oops' in err.value.args[0]
 
 
 def test_create_get_route_has_empty_form(testapp):

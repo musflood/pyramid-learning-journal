@@ -2,7 +2,7 @@
 
 **Author**: Megan Flood
 
-**Version**: 3.0.0
+**Version**: 3.1.0
 
 ## Overview
 Blog created with Pyramid for recording a Learning Journal of Code 401: Python
@@ -11,8 +11,13 @@ Deployed on Heroku: https://mus-learning-journal.herokuapp.com/
 
 ## Routes
 - `/` - the home page with a listing of all entries
+
 - `/journal/{id:\d+}` - the page for an individual entry
+
 - `/journal/{id:\d+}/edit-entry` - edit an existing entry
+
+- `/journal/{id:\d+}/delete-entry` - delete an existing entry
+
 - `/journal/new-entry` - add a new entry to the journal
 
 ## Getting Started
@@ -40,9 +45,11 @@ All tests passing in Python 2 and 3.
 [Michael Shinners](https://github.com/mshinners) - Help building out the site using Pyramid
 
 ## Change Log
-**11-4-2017 3:04pm** - Made learning journal entries into Models connected to a database. View has 100% coverage on Python 2 and 3.
 
-**11-3-2017 6:19pm** - Templating for all pages using Jinja2, pages are now dynamically filled. View has 100% coverage on Python 2 and 3.
-
-**10-31-2017 10:25pm** - All pages are static, but successfully deployed to Heroku. View has 100% coverage on Python 2 and 3.
+|date|&emsp;
+--- | ---
+|**11-5-2017 5:20pm** | Added functionality to forms to update and create entries.<br><sup>View and models have 100% coverage on Python 2 and 3.</sup>
+|**11-4-2017 3:04pm** | Made learning journal entries into Models connected to a database.<br><sup>View has 100% coverage on Python 2 and 3.</sup>
+|**11-3-2017 6:19pm** | Templating for all pages using Jinja2, pages are now dynamically filled.<br><sup>View has 100% coverage on Python 2 and 3.</sup>
+|**10-31-2017 10:25pm** | All pages are static, but successfully deployed to Heroku.<br><sup>View has 100% coverage on Python 2 and 3.</sup>
 

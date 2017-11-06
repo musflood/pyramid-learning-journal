@@ -139,7 +139,6 @@ def testapp_session(testapp, request):
 
     def teardown():
         session.transaction.rollback()
-        Base.metadata.drop_all(engine)
 
     request.addfinalizer(teardown)
     return session
