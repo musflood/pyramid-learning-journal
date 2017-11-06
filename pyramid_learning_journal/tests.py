@@ -431,11 +431,100 @@ def test_detail_route_goes_to_404_page_for_invalid_id(testapp):
     assert '<h1>Oops' in err.value.args[0]
 
 
+def test_update_get_route_has_filled_form(testapp):
+    """Test that the Update page has a filled form."""
+    response = testapp.get("/journal/1/edit-entry")
+    assert len(response.html.find_all('input', attrs={"type": "text"})) == 1
+    assert 'value="Day 0"' in str(response.html.find('input', attrs={"type": "text"}))
+
+
 def test_update_get_route_has_an_update_button(testapp):
     """Test that the Update page has a 'Update' button."""
     response = testapp.get("/journal/1/edit-entry")
     assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
     assert "Update" in response.html.find('button', attrs={"type": "submit"})
+
+
+def test_update_get_route_goes_to_404_page_for_invalid_id(testapp):
+    """Test that the update GET route redirects to 404 page for invalid id."""
+    from webtest import AppError
+    with pytest.raises(AppError) as err:
+        testapp.get("/journal/-1/edit-entry")
+    assert '404' in err.value.args[0]
+    assert '<h1>Oops' in err.value.args[0]
+
+
+def test_update_post_route_has_a_302_status_code(testapp):
+    """Test that POST to update route gets a 302 status code."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    response = testapp.post("/journal/1/edit-entry", entry_data)
+    assert response.status_code == 302
+
+
+def test_update_post_route_redirects_to_detail_route_for_id(testapp):
+    """Test that POST to update route redirects to detail for the given id."""
+    entry_data = {
+        'title': 'fun times 2',
+        'body': 'all the fun, all the time. x 2'
+    }
+    response = testapp.post("/journal/1/edit-entry", entry_data)
+    detail = testapp.app.routes_mapper.get_route('detail').generate({'id': 1})
+    assert response.location.endswith(detail)
+
+
+def test_update_post_route_adds_new_entry_to_home(testapp):
+    """Test that the new entry is on the home page after POST to update."""
+    entry_data = {
+        'title': 'fun times 4',
+        'body': 'all the fun, all the time. x 4'
+    }
+    response = testapp.post("/journal/1/edit-entry", entry_data)
+    next_page = response.follow()
+    assert entry_data['title'] in next_page.html.find('h2')
+    assert entry_data['body'] in str(next_page.html.find('div', 'card-text'))
+
+
+def test_update_post_route_has_400_error_for_incomplete_data(testapp):
+    """Test that POST of incomplete data to update causes 400 error."""
+    from webtest import AppError
+    entry_data = {
+        'title': 'fun times 8'
+    }
+    with pytest.raises(AppError) as err:
+        testapp.post("/journal/1/edit-entry", entry_data)
+    assert '400' in err.value.args[0]
+
+
+def test_update_post_route_goes_to_404_page_for_invalid_id(testapp):
+    """Test that the update POST route redirects to 404 page for invalid id."""
+    from webtest import AppError
+    entry_data = {
+        'title': 'fun times 16',
+        'body': 'all the fun, all the time. x 16'
+    }
+    with pytest.raises(AppError) as err:
+        testapp.post("/journal/-1/edit-entry", entry_data)
+    assert '404' in err.value.args[0]
+    assert '<h1>Oops' in err.value.args[0]
+
+
+def test_update_post_route_updates_correct_entry(testapp, testapp_session):
+    """Test that POST to update route updates a entry."""
+    from pyramid_learning_journal.models import Entry
+    entry_data = {
+        'title': 'the end',
+        'body': 'last of the updates.'
+    }
+    old_entry = testapp_session.query(Entry).get(1).to_dict()
+    testapp.post("/journal/1/edit-entry", entry_data)
+    entry = testapp_session.query(Entry).get(1)
+    assert entry.title == entry_data['title']
+    assert entry.body == entry_data['body']
+    assert entry.title != old_entry['title']
+    assert entry.body != old_entry['body']
 
 
 def test_create_get_route_has_empty_form(testapp):
@@ -521,3 +610,14 @@ def test_create_post_route_new_detail_page_has_new_info(testapp, empty_the_db):
     response = testapp.get("/journal/1")
     assert entry_data['title'] in response.html.find('h2')
     assert entry_data['body'] in str(response.html.find('div', 'card-text'))
+
+
+def test_create_post_route_has_400_error_for_incomplete_data(testapp):
+    """Test that POST of incomplete data to create causes 400 error."""
+    from webtest import AppError
+    entry_data = {
+        'title': 'fun times'
+    }
+    with pytest.raises(AppError) as err:
+        testapp.post("/journal/new-entry", entry_data)
+    assert '400' in err.value.args[0]

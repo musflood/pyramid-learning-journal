@@ -96,9 +96,8 @@
          - check value of inputs
          - count the submit buttons 
  + POST
-     * Given incomplete data, reloads page
+     * Given incomplete data, has error
          - response has 400 status code
-         - retains info entered on page
      * Given complete data:
          - new Entry object created
          - reponse has 302 status code
@@ -119,9 +118,8 @@
      * Given invalid id, directs to 404 page
          - response has 404 status code
          - has h1 tag with 'Oops'
-     * Given incomplete data, reloads page
+     * Given incomplete data, has error
          - response has 400 status code
-         - retains info entered on page
      * Given complete data:
          - Entry object with id updated
          - reponse has 302 status code
