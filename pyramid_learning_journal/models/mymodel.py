@@ -10,6 +10,7 @@ from datetime import datetime
 from markdown import markdown
 from pytz import timezone as tz
 from pytz import utc
+import sys
 
 
 class Entry(Base):
@@ -31,9 +32,10 @@ class Entry(Base):
 
     def to_dict(self):
         """Take all model attributes and render them as a dictionary."""
-        local_creation_date = self.creation_date.astimezone(tz('US/Pacific'))
-        # if self.creation_date.tzinfo:
-        #     local_creation_date = local_creation_date.astimezone(tz('US/Pacific'))
+        if sys.version_info.major == 3:  # pragma: no cover
+            local_creation_date = self.creation_date.astimezone(tz('US/Pacific'))
+        else:
+            local_creation_date = self.creation_date
 
         return {
             'id': self.id,
