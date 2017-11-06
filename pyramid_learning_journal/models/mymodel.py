@@ -34,7 +34,7 @@ class Entry(Base):
         """Take all model attributes and render them as a dictionary."""
         if sys.version_info.major == 3:  # pragma: no cover
             local_creation_date = self.creation_date.astimezone(tz('US/Pacific'))
-        else:
+        else:  # pragma: no cover
             local_creation_date = self.creation_date
 
         return {
