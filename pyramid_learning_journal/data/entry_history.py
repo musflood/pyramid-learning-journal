@@ -105,7 +105,7 @@ definitions is super awesome! Especially the * for any number of arguments \
     'title': "Day Fourteen",
     'body': "Let's see. Today we discussed what a graph is. Basically an interconnected web of points that is defined by its points and connections. Pretty interesting, but I think that traversing them is going to be a mess.\n\nWe also went over how to test interactions with the database. Everything made logical sense. You need to work in an isolated testing database in order to not contaminate your actual database. Every request needs to have a database session so that you can actually interact with the database in a test. Finally, you need to be careful of the order you do your operations in so that they do not conflict with each other.\n\nAt the same time, you could make use of this fact to carry out a series of CRUD operations efficiently. Test that you can POST a new model, GET that model, PUT new information into it, and then DELETE it.",
     'id': 14
-    }
+    },
     {
     'creation_date': datetime.strptime('11/03/2017 10:19 PM', FMT),
     'title': "Day Fifteen",
