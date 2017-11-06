@@ -97,7 +97,19 @@ definitions is super awesome! Especially the * for any number of arguments \
     {
     'creation_date': datetime.strptime('11/01/2017 10:16 PM', FMT),
     'title': "Day Thrirteen",
-    'body': "SQLAlchemy, all of the Postgres with none of the SQL! <p>It is very interesting to interact with a database simply by interacting normally with objects. Definitely need to remember to add and commit changes made in order to actually change the database. This should make it much easier to make complicated queries to the database. Although I think that the reason why it was especially difficult in Node was that everything was asynchronous, which is not the case in Python. <p>I am curious how to implement other types of requests through Pyramid. Besides get requests through anchor tag links, we haven't had much interaction with the front-end side of the web site. I wonder if we just have routes that execute the different requests, like when using Page.js...",
+    'body': "SQLAlchemy, all of the Postgres with none of the SQL! \n\nIt is very interesting to interact with a database simply by interacting normally with objects. Definitely need to remember to add and commit changes made in order to actually change the database. This should make it much easier to make complicated queries to the database. Although I think that the reason why it was especially difficult in Node was that everything was asynchronous, which is not the case in Python. <p>I am curious how to implement other types of requests through Pyramid. Besides get requests through anchor tag links, we haven't had much interaction with the front-end side of the web site. I wonder if we just have routes that execute the different requests, like when using Page.js...",
     'id': 13
+    },
+    {
+    'creation_date': datetime.strptime('11/02/2017 9:56 PM', FMT),
+    'title': "Day Fourteen",
+    'body': "Let's see. Today we discussed what a graph is. Basically an interconnected web of points that is defined by its points and connections. Pretty interesting, but I think that traversing them is going to be a mess.\n\nWe also went over how to test interactions with the database. Everything made logical sense. You need to work in an isolated testing database in order to not contaminate your actual database. Every request needs to have a database session so that you can actually interact with the database in a test. Finally, you need to be careful of the order you do your operations in so that they do not conflict with each other.\n\nAt the same time, you could make use of this fact to carry out a series of CRUD operations efficiently. Test that you can POST a new model, GET that model, PUT new information into it, and then DELETE it.",
+    'id': 14
+    }
+    {
+    'creation_date': datetime.strptime('11/03/2017 10:19 PM', FMT),
+    'title': "Day Fifteen",
+    'body': "So much code review!\n\nIt was nice to see people pick apart our rather unnecessarily complicated priority queue. It helps to take a step back and realize which parts are actually necessary. I also noticed that while we did have excellent coverage for our unit tests, we did not really test that the functions still worked properly when used with each other. Like inserting, peeking, then popping and peeking again. I think that we kinda took for granted that the methods worked together if they all worked in isolated tests.\n\nThe never ending quest for more tests! :D",
+    'id': 15
     }
 ]
