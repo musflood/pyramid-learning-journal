@@ -44,7 +44,6 @@ pyramid-learning-journal $ source ENV/bin/activate
 Install the application with [`pip`](https://pip.pypa.io/en/stable/installing/).
 ```
 (ENV) pyramid-learning-journal $ pip install -e .[testing]
-(ENV) pyramid-learning-journal $ pserve development.ini --reload
 ```
 
 Create a [Postgres](https://wiki.postgresql.org/wiki/Detailed_installation_guides) database for use with this application.
