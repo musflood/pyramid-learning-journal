@@ -30,7 +30,11 @@ def detail_view(request):
     raise HTTPNotFound
 
 
-@view_config(route_name='create', renderer='pyramid_learning_journal:templates/create.jinja2')
+@view_config(
+    route_name='create',
+    renderer='pyramid_learning_journal:templates/create.jinja2',
+    permission='secret'
+)
 def create_view(request):
     """Create a new entry."""
     if request.method == 'GET':
@@ -49,7 +53,11 @@ def create_view(request):
         return HTTPFound(request.route_url('home'))
 
 
-@view_config(route_name='edit', renderer='pyramid_learning_journal:templates/edit.jinja2')
+@view_config(
+    route_name='edit',
+    renderer='pyramid_learning_journal:templates/edit.jinja2',
+    permission='secret'
+)
 def update_view(request):
     """Update an existing entry."""
     entry_id = int(request.matchdict['id'])
@@ -75,7 +83,7 @@ def update_view(request):
         return HTTPFound(request.route_url('detail', id=entry_id))
 
 
-@view_config(route_name='delete')
+@view_config(route_name='delete', permission='secret')
 def delete_journal_entry(request):
     """Delete a journal entry."""
     if request.method == 'GET':
