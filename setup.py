@@ -21,7 +21,8 @@ requires = [
     'waitress',
     'psycopg2',
     'markdown',
-    'pytz'
+    'pytz',
+    'passlib'
 ]
 
 tests_require = [
