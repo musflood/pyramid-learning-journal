@@ -4,6 +4,11 @@
     <form method="POST">
         <div class="card mb-3">
             <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                  {{ error }}
+                </div>
+                {% endif %}
                 <input type="text" name="username" placeholder="Username" class="form-control border-light bg-light mb-3" required>
                 <input type="password" name="password" placeholder="Password" class="form-control border-light bg-light" required>
             </div>

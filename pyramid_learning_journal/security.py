@@ -21,7 +21,7 @@ class JournalRoot(object):
 def check_credentials(username, password):
     """Check if the username and password are correct."""
     if username == os.environ.get('AUTH_USERNAME', ''):
-        if pwd_context.verify(password, os.environ.get('AUTH_PASSWORD')):
+        if pwd_context.verify(password, os.environ.get('AUTH_PASSWORD', '')):
             return True
     return False
 

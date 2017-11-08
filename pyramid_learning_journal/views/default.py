@@ -1,6 +1,8 @@
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPNotFound, HTTPFound, HTTPBadRequest
 from pyramid_learning_journal.models import Entry
+from pyramid.security import remember, forget
+from pyramid_learning_journal.security import check_credentials
 
 
 @view_config(route_name='home', renderer='pyramid_learning_journal:templates/list_view.jinja2')
@@ -99,3 +101,33 @@ def delete_journal_entry(request):
     if request.method == 'POST':
         request.dbsession.delete(entry)
         return HTTPFound(request.route_url('home'))
+
+
+@view_config(route_name='login', renderer='pyramid_learning_journal:templates/login.jinja2')
+def login(request):
+    """Login to the learning journal to get authenticated."""
+    if request.authenticated_userid:
+        return HTTPFound(request.route_url('home'))
+
+    if request.method == 'GET':
+        return {"page_title": "Login"}
+
+    if request.method == 'POST':
+        if 'username' not in request.POST and 'password' not in request.POST:
+            raise HTTPBadRequest
+        username = request.POST['username']
+        password = request.POST['password']
+        if check_credentials(username, password):
+            headers = remember(request, username)
+            return HTTPFound(request.route_url('home'), headers=headers)
+        return {
+            "page_title": "Login",
+            'error': 'The username and/or password are incorrect.'
+        }
+
+
+@view_config(route_name='logout', permission='secret')
+def logout(request):
+    """Logout of the learning journal, remove authorization."""
+    headers = forget(request)
+    return HTTPFound(request.route_url('home'), headers=headers)
