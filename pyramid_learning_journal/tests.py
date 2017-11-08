@@ -404,7 +404,13 @@ def test_delete_journal_entry_post_raises_httpnotfound_for_bad_id(dummy_request,
 """ FUNCTIONAL TESTS FOR ROUTES """
 
 
-def test_home_route_has_all_journal_entries(testapp, fill_the_db, test_entries):
+def test_home_route_gets_200_status_code(testapp, fill_the_db):
+    """Test that the home route gets 200 status code."""
+    response = testapp.get("/")
+    assert response.status_code == 200
+
+
+def test_home_route_has_all_journal_entries(testapp, test_entries):
     """Test that the home route all journal entries."""
     response = testapp.get("/")
     assert len(test_entries) == len(response.html.find_all('div', 'card'))
@@ -416,6 +422,12 @@ def test_detail_route_has_one_entry(testapp):
     assert len(response.html.find_all('div', 'card')) == 1
 
 
+def test_detail_route_for_valid_id_gets_200_status_code(testapp):
+    """Test that the detail route of a valid gets 200 status code."""
+    response = testapp.get("/journal/1")
+    assert response.status_code == 200
+
+
 def test_detail_route_has_correct_entry(testapp):
     """Test that the detail route shows correct journal entry."""
     response = testapp.get("/journal/1")
@@ -424,11 +436,14 @@ def test_detail_route_has_correct_entry(testapp):
 
 def test_detail_route_goes_to_404_page_for_invalid_id(testapp):
     """Test that the detail route redirects to 404 page for invalid id."""
-    from webtest import AppError
-    with pytest.raises(AppError) as err:
-        testapp.get("/journal/-1")
-    assert '404' in err.value.args[0]
-    assert '<h1>Oops' in err.value.args[0]
+    response = testapp.get("/journal/-1", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
+
+
+def test_update_get_route_for_valid_id_gets_200_status_code(testapp):
+    """Test that GET to update route of a valid gets 200 status code."""
+    response = testapp.get("/journal/1/edit-entry")
+    assert response.status_code == 200
 
 
 def test_update_get_route_has_filled_form(testapp):
@@ -447,11 +462,8 @@ def test_update_get_route_has_an_update_button(testapp):
 
 def test_update_get_route_goes_to_404_page_for_invalid_id(testapp):
     """Test that the update GET route redirects to 404 page for invalid id."""
-    from webtest import AppError
-    with pytest.raises(AppError) as err:
-        testapp.get("/journal/-1/edit-entry")
-    assert '404' in err.value.args[0]
-    assert '<h1>Oops' in err.value.args[0]
+    response = testapp.get("/journal/-1/edit-entry", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
 
 
 def test_update_post_route_updates_correct_entry(testapp, testapp_session):
@@ -516,24 +528,18 @@ def test_update_post_route_has_400_error_for_incomplete_data(testapp):
 
 def test_update_post_route_goes_to_404_page_for_invalid_id(testapp):
     """Test that the update POST route redirects to 404 page for invalid id."""
-    from webtest import AppError
     entry_data = {
         'title': 'the end',
         'body': 'last of the updates.'
     }
-    with pytest.raises(AppError) as err:
-        testapp.post("/journal/-1/edit-entry", entry_data)
-    assert '404' in err.value.args[0]
-    assert '<h1>Oops' in err.value.args[0]
+    response = testapp.post("/journal/-1/edit-entry", entry_data, status=404)
+    assert 'Oops' in str(response.html.find('h1'))
 
 
 def test_delete_get_route_goes_to_404_page(testapp):
     """Test that the delete GET route redirects to 404 page."""
-    from webtest import AppError
-    with pytest.raises(AppError) as err:
-        testapp.get("/journal/1/delete-entry")
-    assert '404' in err.value.args[0]
-    assert '<h1>Oops' in err.value.args[0]
+    response = testapp.get("/journal/1/delete-entry", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
 
 
 def test_delete_post_route_deletes_correct_entry(testapp, testapp_session):
@@ -567,23 +573,23 @@ def test_delete_post_route_removes_entry_to_home(testapp, test_entries):
 
 def test_delete_route_removes_detail_page_for_id(testapp):
     """Test that the delete route also removes access to detail page for id."""
-    from webtest import AppError
     testapp.get("/journal/5")
     testapp.post("/journal/5/delete-entry")
 
-    with pytest.raises(AppError) as err:
-        testapp.get("/journal/5")
-    assert '404' in err.value.args[0]
-    assert '<h1>Oops' in err.value.args[0]
+    response = testapp.get("/journal/5", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
 
 
 def test_delete_post_route_goes_to_404_page_for_invalid_id(testapp):
     """Test that the delete POST route redirects to 404 page for invalid id."""
-    from webtest import AppError
-    with pytest.raises(AppError) as err:
-        testapp.post("/journal/-1/delete-entry")
-    assert '404' in err.value.args[0]
-    assert '<h1>Oops' in err.value.args[0]
+    response = testapp.post("/journal/-1/delete-entry", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
+
+
+def test_create_get_route_gets_200_status_code(testapp):
+    """Test that GET to create route gets 200 status code."""
+    response = testapp.get("/journal/new-entry")
+    assert response.status_code == 200
 
 
 def test_create_get_route_has_empty_form(testapp):
