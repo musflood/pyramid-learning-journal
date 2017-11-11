@@ -113,7 +113,7 @@ def login(request):
         return {"page_title": "Login"}
 
     if request.method == 'POST':
-        if 'username' not in request.POST and 'password' not in request.POST:
+        if 'username' not in request.POST or 'password' not in request.POST:
             raise HTTPBadRequest
         username = request.POST['username']
         password = request.POST['password']

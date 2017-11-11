@@ -84,6 +84,7 @@ def testapp(request):
         config.include('pyramid_jinja2')
         config.include('pyramid_learning_journal.routes')
         config.include('pyramid_learning_journal.models')
+        config.include("pyramid_learning_journal.security")
         config.scan()
         return config.make_wsgi_app()
 
