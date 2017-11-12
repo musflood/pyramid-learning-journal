@@ -670,280 +670,336 @@ def test_login_post_route_unauth_correct_data_adds_auth_tkt_cookie(testapp):
     assert 'auth_tkt' in testapp.cookies
 
 
-# def test_home_route_auth_gets_200_status_code(testapp):
-#     """Test that the home route gets 200 status code."""
-#     response = testapp.get("/")
-#     assert response.status_code == 200
+def test_login_get_route_auth_has_302_status_code(testapp):
+    """Test that GET to login route has 302 status code."""
+    response = testapp.get("/login")
+    assert response.status_code == 302
 
-
-# def test_home_route_auth_has_all_journal_entries(testapp, test_entries):
-#     """Test that the home route all journal entries."""
-#     response = testapp.get("/")
-#     assert len(test_entries) == len(response.html.find_all('div', 'card'))
-
 
-# def test_detail_route_auth_has_one_entry(testapp):
-#     """Test that the detail route shows one journal entry."""
-#     response = testapp.get("/journal/1")
-#     assert len(response.html.find_all('div', 'card')) == 1
-
-
-# def test_detail_route_auth_for_valid_id_gets_200_status_code(testapp):
-#     """Test that the detail route of a valid gets 200 status code."""
-#     response = testapp.get("/journal/1")
-#     assert response.status_code == 200
-
-
-# def test_detail_route_auth_has_correct_entry(testapp):
-#     """Test that the detail route shows correct journal entry."""
-#     response = testapp.get("/journal/1")
-#     assert 'Day 0' in response.html.find('h2')
-
-
-# def test_detail_route_auth_goes_to_404_page_for_invalid_id(testapp):
-#     """Test that the detail route redirects to 404 page for invalid id."""
-#     response = testapp.get("/journal/100", status=404)
-#     assert 'Oops' in str(response.html.find('h1'))
-
+def test_login_get_route_auth_redirects_to_home(testapp):
+    """Test that GET to login route redirects to home page."""
+    response = testapp.get("/login")
+    home = testapp.app.routes_mapper.get_route('home').path
+    assert response.location.endswith(home)
 
-# def test_update_get_route_auth_for_valid_id_gets_200_status_code(testapp):
-#     """Test that GET to update route of a valid gets 200 status code."""
-#     response = testapp.get("/journal/1/edit-entry")
-#     assert response.status_code == 200
-
-
-# def test_update_get_route_auth_has_filled_form(testapp):
-#     """Test that the Update page has a filled form."""
-#     response = testapp.get("/journal/1/edit-entry")
-#     assert len(response.html.find_all('input', attrs={"type": "text"})) == 1
-#     assert 'value="Day 0"' in str(response.html.find('input', attrs={"type": "text"}))
-
 
-# def test_update_get_route_auth_has_an_update_button(testapp):
-#     """Test that the Update page has a 'Update' button."""
-#     response = testapp.get("/journal/1/edit-entry")
-#     assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
-#     assert "Update" in response.html.find('button', attrs={"type": "submit"})
-
+def test_login_get_route_auth_home_still_has_logout_tab(testapp):
+    """Test that GET to login route has home page with logout tab."""
+    response = testapp.get("/login")
+    next_page = response.follow()
+    assert len(next_page.html.find_all('li', 'nav-item')) == 3
+    assert 'Logout' in str(next_page.html.find_all('li', 'nav-item')[2])
 
-# def test_update_get_route_auth_goes_to_404_page_for_invalid_id(testapp):
-#     """Test that the update GET route redirects to 404 page for invalid id."""
-#     response = testapp.get("/journal/100/edit-entry", status=404)
-#     assert 'Oops' in str(response.html.find('h1'))
 
-
-# def test_update_post_route_auth_updates_correct_entry(testapp, testapp_session):
-#     """Test that POST to update route updates a entry."""
-#     from pyramid_learning_journal.models import Entry
-#     entry_data = {
-#         'title': 'so it begins',
-#         'body': 'the beginning of change'
-#     }
-#     old_entry = testapp_session.query(Entry).get(1).to_dict()
-#     testapp.post("/journal/1/edit-entry", entry_data)
-#     entry = testapp_session.query(Entry).get(1)
-#     assert entry.title == entry_data['title']
-#     assert entry.body == entry_data['body']
-#     assert entry.title != old_entry['title']
-#     assert entry.body != old_entry['body']
+def test_login_get_route_auth_keeps_auth_tkt_cookie(testapp):
+    """Test that GET to login route adds auth_tkt cookie."""
+    assert 'auth_tkt' in testapp.cookies
+    testapp.get("/login")
+    assert 'auth_tkt' in testapp.cookies
 
 
-# def test_update_post_route_auth_has_a_302_status_code(testapp):
-#     """Test that POST to update route gets a 302 status code."""
-#     entry_data = {
-#         'title': 'fun times',
-#         'body': 'all the fun, all the time.'
-#     }
-#     response = testapp.post("/journal/1/edit-entry", entry_data)
-#     assert response.status_code == 302
+def test_login_post_route_auth_has_302_status_code(testapp):
+    """Test that POST to login route has 302 status code."""
+    response = testapp.post("/login")
+    assert response.status_code == 302
 
 
-# def test_update_post_route_auth_redirects_to_detail_route_for_id(testapp):
-#     """Test that POST to update route redirects to detail for the given id."""
-#     entry_data = {
-#         'title': 'fun times 2',
-#         'body': 'all the fun, all the time. x 2'
-#     }
-#     response = testapp.post("/journal/1/edit-entry", entry_data)
-#     detail = testapp.app.routes_mapper.get_route('detail').generate({'id': 1})
-#     assert response.location.endswith(detail)
+def test_login_post_route_auth_redirects_to_home(testapp):
+    """Test that POST to login route redirects to home page."""
+    response = testapp.post("/login")
+    home = testapp.app.routes_mapper.get_route('home').path
+    assert response.location.endswith(home)
 
 
-# def test_update_post_route_auth_adds_new_entry_to_home(testapp):
-#     """Test that the new entry is on the home page after POST to update."""
-#     entry_data = {
-#         'title': 'fun times 4',
-#         'body': 'all the fun, all the time. x 4'
-#     }
-#     response = testapp.post("/journal/1/edit-entry", entry_data)
-#     next_page = response.follow()
-#     assert entry_data['title'] in next_page.html.find('h2')
-#     assert entry_data['body'] in str(next_page.html.find('div', 'card-text'))
-
+def test_login_post_route_auth_home_still_has_logout_tab(testapp):
+    """Test that POST to login route has home page with logout tab."""
+    response = testapp.post("/login")
+    next_page = response.follow()
+    assert len(next_page.html.find_all('li', 'nav-item')) == 3
+    assert 'Logout' in str(next_page.html.find_all('li', 'nav-item')[2])
 
-# def test_update_post_route_auth_has_400_error_for_incomplete_data(testapp):
-#     """Test that POST of incomplete data to update causes 400 error."""
-#     entry_data = {
-#         'title': 'fun times 8'
-#     }
-#     assert testapp.post("/journal/1/edit-entry", entry_data, status=400)
-
-
-# def test_update_post_route_auth_goes_to_404_page_for_invalid_id(testapp):
-#     """Test that the update POST route redirects to 404 page for invalid id."""
-#     entry_data = {
-#         'title': 'the end',
-#         'body': 'last of the updates.'
-#     }
-#     response = testapp.post("/journal/100/edit-entry", entry_data, status=404)
-#     assert 'Oops' in str(response.html.find('h1'))
-
-
-# def test_delete_get_route_auth_goes_to_404_page(testapp):
-#     """Test that the delete GET route redirects to 404 page."""
-#     response = testapp.get("/journal/1/delete-entry", status=404)
-#     assert 'Oops' in str(response.html.find('h1'))
-
-
-# def test_delete_post_route_auth_deletes_correct_entry(testapp, testapp_session):
-#     """Test that POST to delete route deletes a entry."""
-#     from pyramid_learning_journal.models import Entry
-#     entry = testapp_session.query(Entry).get(1)
-#     testapp.post("/journal/1/delete-entry")
-#     assert entry not in testapp_session.query(Entry).all()
-
-
-# def test_delete_post_route_auth_has_a_302_status_code(testapp):
-#     """Test that POST to delete route gets a 302 status code."""
-#     response = testapp.post("/journal/2/delete-entry")
-#     assert response.status_code == 302
-
-
-# def test_delete_post_route_auth_redirects_to_home_route(testapp):
-#     """Test that POST to delete route redirects to home route."""
-#     response = testapp.post("/journal/3/delete-entry")
-#     home = testapp.app.routes_mapper.get_route('home').path
-#     assert response.location.endswith(home)
-
-
-# def test_delete_post_route_auth_removes_entry_to_home(testapp, test_entries):
-#     """Test that the entry is gone from the home page after POST to delete."""
-#     response = testapp.post("/journal/4/delete-entry")
-#     next_page = response.follow()
-#     assert 'Day 3' not in next_page.html.find_all('h2')[100]
-#     assert len(next_page.html.find_all('h2')) == len(test_entries) - 4
-
-
-# def test_delete_route_auth_removes_detail_page_for_id(testapp):
-#     """Test that the delete route also removes access to detail page for id."""
-#     testapp.get("/journal/5")
-#     testapp.post("/journal/5/delete-entry")
-
-#     response = testapp.get("/journal/5", status=404)
-#     assert 'Oops' in str(response.html.find('h1'))
-
-
-# def test_delete_post_route_auth_goes_to_404_page_for_invalid_id(testapp):
-#     """Test that the delete POST route redirects to 404 page for invalid id."""
-#     response = testapp.post("/journal/100/delete-entry", status=404)
-#     assert 'Oops' in str(response.html.find('h1'))
-
-
-# def test_create_get_route_auth_gets_200_status_code(testapp):
-#     """Test that GET to create route gets 200 status code."""
-#     response = testapp.get("/journal/new-entry")
-#     assert response.status_code == 200
-
-
-# def test_create_get_route_auth_has_empty_form(testapp):
-#     """Test that the Create page has an empty form."""
-#     response = testapp.get("/journal/new-entry")
-#     assert len(response.html.find_all('input', attrs={"type": "text"})) == 1
-#     assert 'value' not in response.html.find('input', attrs={"type": "text"})
-
-
-# def test_create_get_route_auth_has_a_create_button(testapp):
-#     """Test that the Create page has a 'Create' button."""
-#     response = testapp.get("/journal/new-entry")
-#     assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
-#     assert "Create" in response.html.find('button', attrs={"type": "submit"})
-
-
-# def test_create_post_route_auth_adds_a_new_entry(testapp, empty_the_db, testapp_session):
-#     """Test that POST to create route creates a new entry."""
-#     from pyramid_learning_journal.models import Entry
-#     assert len(testapp_session.query(Entry).all()) == 0
-#     entry_data = {
-#         'title': 'fun times',
-#         'body': 'all the fun, all the time.'
-#     }
-#     testapp.post("/journal/new-entry", entry_data)
-#     assert len(testapp_session.query(Entry).all()) == 1
-
-
-# def test_create_post_route_auth_has_a_302_status_code(testapp, empty_the_db):
-#     """Test that POST to create route gets a 302 status code."""
-#     entry_data = {
-#         'title': 'fun times',
-#         'body': 'all the fun, all the time.'
-#     }
-#     response = testapp.post("/journal/new-entry", entry_data)
-#     assert response.status_code == 302
-
-
-# def test_create_post_route_auth_redirects_to_home_route(testapp, empty_the_db):
-#     """Test that POST to create route redirects to home route."""
-#     entry_data = {
-#         'title': 'fun times',
-#         'body': 'all the fun, all the time.'
-#     }
-#     response = testapp.post("/journal/new-entry", entry_data)
-#     home = testapp.app.routes_mapper.get_route('home').path
-#     assert response.location.endswith(home)
-
-
-# def test_create_post_route_auth_adds_new_entry_to_home(testapp, empty_the_db):
-#     """Test that the new entry is on the home page after POST to create."""
-#     entry_data = {
-#         'title': 'fun times',
-#         'body': 'all the fun, all the time.'
-#     }
-#     response = testapp.post("/journal/new-entry", entry_data)
-#     next_page = response.follow()
-#     assert entry_data['title'] in next_page.html.find('h2')
-#     assert entry_data['body'] in str(next_page.html.find('div', 'card-text'))
-
-
-# def test_create_post_route_auth_allows_access_to_detail_page(testapp, empty_the_db):
-#     """Test that the new entry has an available detail page."""
-#     assert testapp.get("/journal/1", status=404)
-
-#     entry_data = {
-#         'title': 'fun times',
-#         'body': 'all the fun, all the time.'
-#     }
-#     testapp.post("/journal/new-entry", entry_data)
-#     testapp.get("/journal/1")
-
-
-# def test_create_post_route_auth_new_detail_page_has_new_info(testapp, empty_the_db):
-#     """Test that the detail page for new entry has the correct info."""
-#     entry_data = {
-#         'title': 'fun times',
-#         'body': 'all the fun, all the time.'
-#     }
-#     testapp.post("/journal/new-entry", entry_data)
-#     response = testapp.get("/journal/1")
-#     assert entry_data['title'] in response.html.find('h2')
-#     assert entry_data['body'] in str(response.html.find('div', 'card-text'))
-
-
-# def test_create_post_route_auth_has_400_error_for_incomplete_data(testapp):
-#     """Test that POST of incomplete data to create causes 400 error."""
-#     entry_data = {
-#         'title': 'fun times'
-#     }
-#     assert testapp.post("/journal/new-entry", entry_data, status=400)
+
+def test_login_post_route_auth_keeps_auth_tkt_cookie(testapp):
+    """Test that POST to login route adds auth_tkt cookie."""
+    assert 'auth_tkt' in testapp.cookies
+    testapp.post("/login")
+    assert 'auth_tkt' in testapp.cookies
+
+
+def test_home_route_auth_gets_200_status_code(testapp):
+    """Test that the home route gets 200 status code."""
+    response = testapp.get("/")
+    assert response.status_code == 200
+
+
+def test_home_route_auth_has_all_journal_entries(testapp, test_entries):
+    """Test that the home route all journal entries."""
+    response = testapp.get("/")
+    assert len(test_entries) == len(response.html.find_all('div', 'card'))
+
+
+def test_detail_route_auth_has_one_entry(testapp):
+    """Test that the detail route shows one journal entry."""
+    response = testapp.get("/journal/1")
+    assert len(response.html.find_all('div', 'card')) == 1
+
+
+def test_detail_route_auth_for_valid_id_gets_200_status_code(testapp):
+    """Test that the detail route of a valid gets 200 status code."""
+    response = testapp.get("/journal/1")
+    assert response.status_code == 200
+
+
+def test_detail_route_auth_has_correct_entry(testapp):
+    """Test that the detail route shows correct journal entry."""
+    response = testapp.get("/journal/1")
+    assert 'Day 0' in response.html.find('h2')
+
+
+def test_detail_route_auth_goes_to_404_page_for_invalid_id(testapp):
+    """Test that the detail route redirects to 404 page for invalid id."""
+    response = testapp.get("/journal/100", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
+
+
+def test_update_get_route_auth_for_valid_id_gets_200_status_code(testapp):
+    """Test that GET to update route of a valid gets 200 status code."""
+    response = testapp.get("/journal/1/edit-entry")
+    assert response.status_code == 200
+
+
+def test_update_get_route_auth_has_filled_form(testapp):
+    """Test that the Update page has a filled form."""
+    response = testapp.get("/journal/1/edit-entry")
+    assert len(response.html.find_all('input', attrs={"type": "text"})) == 1
+    assert 'value="Day 0"' in str(response.html.find('input', attrs={"type": "text"}))
+
+
+def test_update_get_route_auth_has_an_update_button(testapp):
+    """Test that the Update page has a 'Update' button."""
+    response = testapp.get("/journal/1/edit-entry")
+    assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
+    assert "Update" in response.html.find('button', attrs={"type": "submit"})
+
+
+def test_update_get_route_auth_goes_to_404_page_for_invalid_id(testapp):
+    """Test that the update GET route redirects to 404 page for invalid id."""
+    response = testapp.get("/journal/100/edit-entry", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
+
+
+def test_update_post_route_auth_updates_correct_entry(testapp, testapp_session):
+    """Test that POST to update route updates a entry."""
+    from pyramid_learning_journal.models import Entry
+    entry_data = {
+        'title': 'so it begins',
+        'body': 'the beginning of change'
+    }
+    old_entry = testapp_session.query(Entry).get(1).to_dict()
+    testapp.post("/journal/1/edit-entry", entry_data)
+    entry = testapp_session.query(Entry).get(1)
+    assert entry.title == entry_data['title']
+    assert entry.body == entry_data['body']
+    assert entry.title != old_entry['title']
+    assert entry.body != old_entry['body']
+
+
+def test_update_post_route_auth_has_a_302_status_code(testapp):
+    """Test that POST to update route gets a 302 status code."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    response = testapp.post("/journal/1/edit-entry", entry_data)
+    assert response.status_code == 302
+
+
+def test_update_post_route_auth_redirects_to_detail_route_for_id(testapp):
+    """Test that POST to update route redirects to detail for the given id."""
+    entry_data = {
+        'title': 'fun times 2',
+        'body': 'all the fun, all the time. x 2'
+    }
+    response = testapp.post("/journal/1/edit-entry", entry_data)
+    detail = testapp.app.routes_mapper.get_route('detail').generate({'id': 1})
+    assert response.location.endswith(detail)
+
+
+def test_update_post_route_auth_adds_new_entry_to_home(testapp):
+    """Test that the new entry is on the home page after POST to update."""
+    entry_data = {
+        'title': 'fun times 4',
+        'body': 'all the fun, all the time. x 4'
+    }
+    response = testapp.post("/journal/1/edit-entry", entry_data)
+    next_page = response.follow()
+    assert entry_data['title'] in next_page.html.find('h2')
+    assert entry_data['body'] in str(next_page.html.find('div', 'card-text'))
+
+
+def test_update_post_route_auth_has_400_error_for_incomplete_data(testapp):
+    """Test that POST of incomplete data to update causes 400 error."""
+    entry_data = {
+        'title': 'fun times 8'
+    }
+    assert testapp.post("/journal/1/edit-entry", entry_data, status=400)
+
+
+def test_update_post_route_auth_goes_to_404_page_for_invalid_id(testapp):
+    """Test that the update POST route redirects to 404 page for invalid id."""
+    entry_data = {
+        'title': 'the end',
+        'body': 'last of the updates.'
+    }
+    response = testapp.post("/journal/100/edit-entry", entry_data, status=404)
+    assert 'Oops' in str(response.html.find('h1'))
+
+
+def test_delete_get_route_auth_goes_to_404_page(testapp):
+    """Test that the delete GET route redirects to 404 page."""
+    response = testapp.get("/journal/1/delete-entry", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
+
+
+def test_delete_post_route_auth_deletes_correct_entry(testapp, testapp_session):
+    """Test that POST to delete route deletes a entry."""
+    from pyramid_learning_journal.models import Entry
+    entry = testapp_session.query(Entry).get(1)
+    testapp.post("/journal/1/delete-entry")
+    assert entry not in testapp_session.query(Entry).all()
+
+
+def test_delete_post_route_auth_has_a_302_status_code(testapp):
+    """Test that POST to delete route gets a 302 status code."""
+    response = testapp.post("/journal/2/delete-entry")
+    assert response.status_code == 302
+
+
+def test_delete_post_route_auth_redirects_to_home_route(testapp):
+    """Test that POST to delete route redirects to home route."""
+    response = testapp.post("/journal/3/delete-entry")
+    home = testapp.app.routes_mapper.get_route('home').path
+    assert response.location.endswith(home)
+
+
+def test_delete_post_route_auth_removes_entry_from_home(testapp, test_entries):
+    """Test that the entry is gone from the home page after POST to delete."""
+    response = testapp.post("/journal/4/delete-entry")
+    next_page = response.follow()
+    assert 'Day 3' not in next_page.html.find_all('h2')[-1]
+    assert len(next_page.html.find_all('h2')) == len(test_entries) - 4
+
+
+def test_delete_route_auth_removes_detail_page_for_id(testapp):
+    """Test that the delete route also removes access to detail page for id."""
+    testapp.get("/journal/5")
+    testapp.post("/journal/5/delete-entry")
+
+    response = testapp.get("/journal/5", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
+
+
+def test_delete_post_route_auth_goes_to_404_page_for_invalid_id(testapp):
+    """Test that the delete POST route redirects to 404 page for invalid id."""
+    response = testapp.post("/journal/100/delete-entry", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
+
+
+def test_create_get_route_auth_gets_200_status_code(testapp):
+    """Test that GET to create route gets 200 status code."""
+    response = testapp.get("/journal/new-entry")
+    assert response.status_code == 200
+
+
+def test_create_get_route_auth_has_empty_form(testapp):
+    """Test that the Create page has an empty form."""
+    response = testapp.get("/journal/new-entry")
+    assert len(response.html.find_all('input', attrs={"type": "text"})) == 1
+    assert 'value' not in response.html.find('input', attrs={"type": "text"})
+
+
+def test_create_get_route_auth_has_a_create_button(testapp):
+    """Test that the Create page has a 'Create' button."""
+    response = testapp.get("/journal/new-entry")
+    assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
+    assert "Create" in response.html.find('button', attrs={"type": "submit"})
+
+
+def test_create_post_route_auth_adds_a_new_entry(testapp, empty_the_db, testapp_session):
+    """Test that POST to create route creates a new entry."""
+    from pyramid_learning_journal.models import Entry
+    assert len(testapp_session.query(Entry).all()) == 0
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    testapp.post("/journal/new-entry", entry_data)
+    assert len(testapp_session.query(Entry).all()) == 1
+
+
+def test_create_post_route_auth_has_a_302_status_code(testapp, empty_the_db):
+    """Test that POST to create route gets a 302 status code."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    response = testapp.post("/journal/new-entry", entry_data)
+    assert response.status_code == 302
+
+
+def test_create_post_route_auth_redirects_to_home_route(testapp, empty_the_db):
+    """Test that POST to create route redirects to home route."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    response = testapp.post("/journal/new-entry", entry_data)
+    home = testapp.app.routes_mapper.get_route('home').path
+    assert response.location.endswith(home)
+
+
+def test_create_post_route_auth_adds_new_entry_to_home(testapp, empty_the_db):
+    """Test that the new entry is on the home page after POST to create."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    response = testapp.post("/journal/new-entry", entry_data)
+    next_page = response.follow()
+    assert entry_data['title'] in next_page.html.find('h2')
+    assert entry_data['body'] in str(next_page.html.find('div', 'card-text'))
+
+
+def test_create_post_route_auth_allows_access_to_detail_page(testapp, empty_the_db):
+    """Test that the new entry has an available detail page."""
+    assert testapp.get("/journal/1", status=404)
+
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    testapp.post("/journal/new-entry", entry_data)
+    testapp.get("/journal/1")
+
+
+def test_create_post_route_auth_new_detail_page_has_new_info(testapp, empty_the_db):
+    """Test that the detail page for new entry has the correct info."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
+    }
+    testapp.post("/journal/new-entry", entry_data)
+    response = testapp.get("/journal/1")
+    assert entry_data['title'] in response.html.find('h2')
+    assert entry_data['body'] in str(response.html.find('div', 'card-text'))
+
+
+def test_create_post_route_auth_has_400_error_for_incomplete_data(testapp):
+    """Test that POST of incomplete data to create causes 400 error."""
+    entry_data = {
+        'title': 'fun times'
+    }
+    assert testapp.post("/journal/new-entry", entry_data, status=400)
 
 
 def test_logout_route_auth_removes_auth_tkt_cookie(testapp):
