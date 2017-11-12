@@ -2,7 +2,7 @@
 
 **Author**: Megan Flood
 
-**Version**: 3.1.0
+**Version**: 4.0.0
 
 **Deployment Link**: https://mus-learning-journal.herokuapp.com/
 
@@ -22,6 +22,8 @@ All tests passing in Python 2 and 3.
 | `/journal/{id:\d+}/edit-entry` | edit | edit an existing entry by id |
 | `/journal/{id:\d+}/delete-entry` | delete | delete an existing entry by id |
 | `/journal/new-entry` | create | add a new entry to the journal |
+| `/login` | login | login to the journal |
+| `/logout` | logout | logout from the journal |
 
 ## Getting Started
 
@@ -51,9 +53,12 @@ Create a [Postgres](https://wiki.postgresql.org/wiki/Detailed_installation_guide
 (ENV) pyramid-learning-journal $ createdb learning-journal
 ```
 
-Export an environment variable pointing to the location of database.
+Export environmental variables pointing to the location of database, your username, hashed password, and secret
 ```
 (ENV) pyramid-learning-journal $ export DATABASE_URL='postgres://(your url here)/learning-journal'
+(ENV) pyramid-learning-journal $ export AUTH_USERNAME='(username)'
+(ENV) pyramid-learning-journal $ export AUTH_PASSWORD='(hashed password)'
+(ENV) pyramid-learning-journal $ export AUTH_SECRET='(secret)'
 ```
 
 Then initialize the database with the `initializedb` command, providing the right `.ini` file for the app's configuration.
@@ -90,6 +95,7 @@ For testing in both Python 2 and 3, use the `tox` command instead.
 
 | Date | &emsp;
 | :--- | ---
+|**11-11-2017 7:49pm** | Added authorization and authentication for creating, updating, and deleting entries.<br><sup>100% coverage on Python 2 and 3.</sup>
 |**11-5-2017 5:20pm** | Added functionality to forms to update and create entries.<br><sup>100% coverage on Python 2 and 3.</sup>
 |**11-4-2017 3:04pm** | Made learning journal entries into Models connected to a database.<br><sup>View has 100% coverage on Python 2 and 3.</sup>
 |**11-3-2017 6:19pm** | Templating for all pages using Jinja2, pages are now dynamically filled.<br><sup>View has 100% coverage on Python 2 and 3.</sup>

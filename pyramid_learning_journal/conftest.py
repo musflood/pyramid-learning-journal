@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from pyramid import testing
 from pyramid_learning_journal.models.meta import Base
 from pyramid_learning_journal.models import Entry, get_tm_session
+from passlib.apps import custom_app_context as pwd_context
 import transaction
 import os
 import pytest
@@ -143,3 +144,17 @@ def testapp_session(testapp, request):
 
     request.addfinalizer(teardown)
     return session
+
+
+@pytest.fixture
+def username():
+    """Set the username for testing purposes."""
+    os.environ['AUTH_USERNAME'] = 'name'
+    return 'name'
+
+
+@pytest.fixture
+def password():
+    """Set the password for testing purposes."""
+    os.environ['AUTH_PASSWORD'] = pwd_context.hash('password')
+    return 'password'
