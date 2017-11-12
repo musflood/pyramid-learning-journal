@@ -3,7 +3,9 @@
 {% block content %}
     <div class="card mb-5">
         <div class="card-header bg-white">
+            {% if request.authenticated_userid %}
             <a class="ion-android-create btn btn-outline-warning rounded-circle float-right edit" href="{{ request.route_url('edit', id=entry.id) }}"></a>
+            {% endif %}
             <h2 class="card-title mb-1">{{ entry.title }}</h2>
         </div>
         <div class="card-body">

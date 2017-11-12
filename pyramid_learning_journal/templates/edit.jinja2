@@ -17,8 +17,8 @@
 
             <div class="w-100 d-sm-none pb-4 pb-sm-0"></div>
 
-            <a ping="{{ request.route_url('delete', id=entry.id) }}" href="{{ request.route_url('home') }}">
-                <button type="button" name="delete" class="btn btn-outline-danger btn-sm col-4 col-sm-auto trash">
+            <a class="col-4 col-sm-auto trash" ping="{{ request.route_url('delete', id=entry.id) }}" href="{{ request.route_url('home') }}">
+                <button type="button" name="delete" class="btn btn-outline-danger btn-sm col col-sm-auto trash">
                     <span class="d-inline d-sm-none">Delete</span>
                     <span class="ion-ios-trash-outline d-none d-sm-inline"></span>
                 </button>
