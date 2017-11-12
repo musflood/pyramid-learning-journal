@@ -2,7 +2,7 @@
 
 **Author**: Megan Flood
 
-**Version**: 4.0.0
+**Version**: 5.0.0
 
 **Deployment Link**: https://mus-learning-journal.herokuapp.com/
 
@@ -53,12 +53,13 @@ Create a [Postgres](https://wiki.postgresql.org/wiki/Detailed_installation_guide
 (ENV) pyramid-learning-journal $ createdb learning-journal
 ```
 
-Export environmental variables pointing to the location of database, your username, hashed password, and secret
+Export environmental variables pointing to the location of database, your username, hashed password, auth secret, and session secret
 ```
 (ENV) pyramid-learning-journal $ export DATABASE_URL='postgres://(your url here)/learning-journal'
 (ENV) pyramid-learning-journal $ export AUTH_USERNAME='(username)'
 (ENV) pyramid-learning-journal $ export AUTH_PASSWORD='(hashed password)'
 (ENV) pyramid-learning-journal $ export AUTH_SECRET='(secret)'
+(ENV) pyramid-learning-journal $ export SESSION_SECRET='(secret)'
 ```
 
 Then initialize the database with the `initializedb` command, providing the right `.ini` file for the app's configuration.
@@ -95,6 +96,7 @@ For testing in both Python 2 and 3, use the `tox` command instead.
 
 | Date | &emsp;
 | :--- | ---
+|**11-11-2017 9:58pm** | CSRF tokens now required for all POST requests.<br><sup>100% coverage on Python 2 and 3.</sup>
 |**11-11-2017 7:49pm** | Added authorization and authentication for creating, updating, and deleting entries.<br><sup>100% coverage on Python 2 and 3.</sup>
 |**11-5-2017 5:20pm** | Added functionality to forms to update and create entries.<br><sup>100% coverage on Python 2 and 3.</sup>
 |**11-4-2017 3:04pm** | Made learning journal entries into Models connected to a database.<br><sup>View has 100% coverage on Python 2 and 3.</sup>
