@@ -410,7 +410,7 @@ def test_login_get_returns_only_the_page_title_for_unauthenticated_user(dummy_re
     assert 'Login' == response['page_title']
 
 
-def test_login_post_incomplete_data_is_bad_request(dummy_request):
+def test_login_post_incomplete_data_is_bad_request(dummy_request, username, password):
     """Test that login POST with incomplete data is invalid."""
     from pyramid_learning_journal.views.default import login
     data = {
@@ -436,12 +436,12 @@ def test_login_post_incorrect_data_returns_dict_with_error(dummy_request):
     assert 'The username and/or password are incorrect.' == response['error']
 
 
-def test_login_post_correct_data_returns_302_status_code(dummy_request):
+def test_login_post_correct_data_returns_302_status_code(dummy_request, username, password):
     """Test that login POST with correct data gets 302 status code."""
     from pyramid_learning_journal.views.default import login
     data = {
-        'username': os.environ.get('AUTH_USERNAME', ''),
-        'password': os.environ.get('TEST_PASS', '')
+        'username': username,
+        'password': password
     }
     dummy_request.method = 'POST'
     dummy_request.POST = data
@@ -449,12 +449,12 @@ def test_login_post_correct_data_returns_302_status_code(dummy_request):
     assert response.status_code == 302
 
 
-def test_login_post_correct_data_redirects_to_home_with_httpfound(dummy_request):
+def test_login_post_correct_data_redirects_to_home_with_httpfound(dummy_request, username, password):
     """Test that login POST with correct data redirects to home page."""
     from pyramid_learning_journal.views.default import login
     data = {
-        'username': os.environ.get('AUTH_USERNAME', ''),
-        'password': os.environ.get('TEST_PASS', '')
+        'username': username,
+        'password': password
     }
     dummy_request.method = 'POST'
     dummy_request.POST = data
@@ -606,11 +606,11 @@ def test_login_post_route_unauth_wrong_data_has_error_message(testapp):
     assert 'incorrect' in str(response.html.find('div', 'alert'))
 
 
-def test_login_post_route_unauth_correct_data_has_302_status_code(testapp):
+def test_login_post_route_unauth_correct_data_has_302_status_code(testapp, username, password):
     """Test that POST of correct data to login route has 302 status code."""
     data = {
-        'username': os.environ.get('AUTH_USERNAME', ''),
-        'password': os.environ.get('TEST_PASS', '')
+        'username': username,
+        'password': password
     }
     response = testapp.post("/login", data)
     assert response.status_code == 302
@@ -622,11 +622,11 @@ def test_logout_route_auth_gets_302_status_code(testapp):
     assert response.status_code == 302
 
 
-def test_login_post_route_unauth_correct_data_redirects_to_home(testapp):
+def test_login_post_route_unauth_correct_data_redirects_to_home(testapp, username, password):
     """Test that POST of correct data to login route redirects to home page."""
     data = {
-        'username': os.environ.get('AUTH_USERNAME', ''),
-        'password': os.environ.get('TEST_PASS', '')
+        'username': username,
+        'password': password
     }
     response = testapp.post("/login", data)
     home = testapp.app.routes_mapper.get_route('home').path
@@ -640,11 +640,11 @@ def test_logout_route_auth_redirects_to_home(testapp):
     assert response.location.endswith(home)
 
 
-def test_login_post_route_unauth_correct_data_home_has_logout_tab(testapp):
+def test_login_post_route_unauth_correct_data_home_has_logout_tab(testapp, username, password):
     """Test that POST of correct data to login route has home page with logout tab."""
     data = {
-        'username': os.environ.get('AUTH_USERNAME', ''),
-        'password': os.environ.get('TEST_PASS', '')
+        'username': username,
+        'password': password
     }
     response = testapp.post("/login", data)
     next_page = response.follow()
@@ -660,11 +660,11 @@ def test_logout_route_auth_home_has_login_tab(testapp):
     assert 'Login' in str(next_page.html.find_all('li', 'nav-item')[1])
 
 
-def test_login_post_route_unauth_correct_data_adds_auth_tkt_cookie(testapp):
+def test_login_post_route_unauth_correct_data_adds_auth_tkt_cookie(testapp, username, password):
     """Test that POST of correct data to login route adds auth_tkt cookie."""
     data = {
-        'username': os.environ.get('AUTH_USERNAME', ''),
-        'password': os.environ.get('TEST_PASS', '')
+        'username': username,
+        'password': password
     }
     testapp.post("/login", data)
     assert 'auth_tkt' in testapp.cookies
