@@ -2,6 +2,7 @@
 
 {% block content %}
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <div class="card mb-3">
             <div class="card-header bg-white">
                 <input type="text" name="title" placeholder="Title" class="form-control border-light bg-light" required>
