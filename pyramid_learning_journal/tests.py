@@ -413,11 +413,11 @@ def test_login_get_returns_only_the_page_title_for_unauthenticated_user(dummy_re
 def test_login_post_incomplete_data_is_bad_request(dummy_request):
     """Test that login POST with incomplete data is invalid."""
     from pyramid_learning_journal.views.default import login
-    entry_data = {
+    data = {
         'username': 'jack'
     }
     dummy_request.method = 'POST'
-    dummy_request.POST = entry_data
+    dummy_request.POST = data
     with pytest.raises(HTTPBadRequest):
         login(dummy_request)
 
@@ -425,12 +425,12 @@ def test_login_post_incomplete_data_is_bad_request(dummy_request):
 def test_login_post_incorrect_data_returns_dict_with_error(dummy_request):
     """Test that login POST with incorrect data is invalid."""
     from pyramid_learning_journal.views.default import login
-    entry_data = {
+    data = {
         'username': 'jack',
         'password': 'work'
     }
     dummy_request.method = 'POST'
-    dummy_request.POST = entry_data
+    dummy_request.POST = data
     response = login(dummy_request)
     assert 'error' in response
     assert 'The username and/or password are incorrect.' == response['error']
@@ -439,12 +439,12 @@ def test_login_post_incorrect_data_returns_dict_with_error(dummy_request):
 def test_login_post_correct_data_returns_302_status_code(dummy_request):
     """Test that login POST with correct data gets 302 status code."""
     from pyramid_learning_journal.views.default import login
-    entry_data = {
+    data = {
         'username': os.environ.get('AUTH_USERNAME', ''),
         'password': os.environ.get('TEST_PASS', '')
     }
     dummy_request.method = 'POST'
-    dummy_request.POST = entry_data
+    dummy_request.POST = data
     response = login(dummy_request)
     assert response.status_code == 302
 
@@ -452,12 +452,12 @@ def test_login_post_correct_data_returns_302_status_code(dummy_request):
 def test_login_post_correct_data_redirects_to_home_with_httpfound(dummy_request):
     """Test that login POST with correct data redirects to home page."""
     from pyramid_learning_journal.views.default import login
-    entry_data = {
+    data = {
         'username': os.environ.get('AUTH_USERNAME', ''),
         'password': os.environ.get('TEST_PASS', '')
     }
     dummy_request.method = 'POST'
-    dummy_request.POST = entry_data
+    dummy_request.POST = data
     response = login(dummy_request)
     assert isinstance(response, HTTPFound)
     assert response.location == dummy_request.route_url('home')
@@ -481,69 +481,258 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 """ FUNCTIONAL TESTS FOR ROUTES """
 
 
-# def test_home_route_gets_200_status_code(testapp, fill_the_db):
+def test_home_route_unauth_gets_200_status_code(testapp, fill_the_db):
+    """Test that the home route gets 200 status code for unauthN user."""
+    response = testapp.get("/")
+    assert response.status_code == 200
+
+
+def test_home_route_unauth_has_all_journal_entries(testapp, test_entries):
+    """Test that the home route all journal entries."""
+    response = testapp.get("/")
+    assert len(test_entries) == len(response.html.find_all('div', 'card'))
+
+
+def test_home_route_unauth_has_login_tab(testapp):
+    """Test that the home route has only a login tab."""
+    response = testapp.get("/")
+    assert len(response.html.find_all('li', 'nav-item')) == 2
+    assert 'Login' in str(response.html.find_all('li', 'nav-item')[1])
+
+
+def test_detail_route_unauth_has_one_entry(testapp):
+    """Test that the detail route shows one journal entry."""
+    response = testapp.get("/journal/1")
+    assert len(response.html.find_all('div', 'card')) == 1
+
+
+def test_detail_route_unauth_for_valid_id_gets_200_status_code(testapp):
+    """Test that the detail route of a valid gets 200 status code."""
+    response = testapp.get("/journal/1")
+    assert response.status_code == 200
+
+
+def test_detail_route_unauth_has_correct_entry(testapp):
+    """Test that the detail route shows correct journal entry."""
+    response = testapp.get("/journal/1")
+    assert 'Day 0' in response.html.find('h2')
+
+
+def test_detail_route_unauth_has_no_edit_button(testapp):
+    """Test that the detail route has not edit button for unauthN user."""
+    response = testapp.get("/journal/1")
+    assert not response.html.find('a', 'edit')
+
+
+def test_detail_route_unauth_goes_to_404_page_for_invalid_id(testapp):
+    """Test that the detail route redirects to 404 page for invalid id."""
+    response = testapp.get("/journal/100", status=404)
+    assert 'Oops' in str(response.html.find('h1'))
+
+
+def test_update_get_route_unauth_gets_403_status_code(testapp):
+    """Test that the update GET route gets 403 status code for unauthN user."""
+    assert testapp.get("/journal/1/edit-entry", status=403)
+
+
+def test_update_post_route_unauth_gets_403_status_code(testapp):
+    """Test that the update POST route gets 403 status code for unauthN user."""
+    assert testapp.post("/journal/1/edit-entry", status=403)
+
+
+def test_create_get_route_unauth_gets_403_status_code(testapp):
+    """Test that the create GET route gets 403 status code for unauthN user."""
+    assert testapp.get("/journal/new-entry", status=403)
+
+
+def test_create_post_route_unauth_gets_403_status_code(testapp):
+    """Test that the create POST route gets 403 status code for unauthN user."""
+    assert testapp.post("/journal/new-entry", status=403)
+
+
+def test_delete_get_route_unauth_gets_403_status_code(testapp):
+    """Test that the delete GET route gets 403 status code for unauthN user."""
+    assert testapp.get("/journal/1/delete-entry", status=403)
+
+
+def test_delete_post_route_unauth_gets_403_status_code(testapp):
+    """Test that the delete POST route gets 403 status code for unauthN user."""
+    assert testapp.post("/journal/1/delete-entry", status=403)
+
+
+def test_logout_route_unauth_gets_403_status_code(testapp):
+    """Test that the logout route gets 403 status code for unauthN user."""
+    assert testapp.get("/logout", status=403)
+
+
+def test_login_get_route_unauth_gets_200_status_code(testapp):
+    """Test that the login GET route gets 200 status code."""
+    response = testapp.get("/login")
+    assert response.status_code == 200
+
+
+def test_login_get_route_unauth_has_login_form(testapp):
+    """Test that the login GET route gets 200 status code."""
+    response = testapp.get("/login")
+    assert len(response.html.find_all('input')) == 2
+    assert 'Username' in str(response.html.find('input'))
+
+
+def test_login_post_route_unauth_incompelete_data_has_400_error(testapp):
+    """Test that POST of incomplete data to login route gets a 400 error."""
+    data = {
+        'username': 'jack'
+    }
+    assert testapp.post("/login", data, status=400)
+
+
+def test_login_post_route_unauth_wrong_data_has_200_status_code(testapp):
+    """Test that POST of wrong data to login route gets a 200 status code."""
+    data = {
+        'username': 'jack',
+        'password': 'work'
+    }
+    response = testapp.post("/login", data)
+    assert response.status_code == 200
+
+
+def test_login_post_route_unauth_wrong_data_has_error_message(testapp):
+    """Test that POST of wrong data to login route has an error message."""
+    data = {
+        'username': 'jack',
+        'password': 'work'
+    }
+    response = testapp.post("/login", data)
+    assert 'incorrect' in str(response.html.find('div', 'alert'))
+
+
+def test_login_post_route_unauth_correct_data_has_302_status_code(testapp):
+    """Test that POST of correct data to login route has 302 status code."""
+    data = {
+        'username': os.environ.get('AUTH_USERNAME', ''),
+        'password': os.environ.get('TEST_PASS', '')
+    }
+    response = testapp.post("/login", data)
+    assert response.status_code == 302
+
+
+def test_logout_route_auth_gets_302_status_code(testapp):
+    """Test that the logout route gets 302 status code for authN user."""
+    response = testapp.get("/logout")
+    assert response.status_code == 302
+
+
+def test_login_post_route_unauth_correct_data_redirects_to_home(testapp):
+    """Test that POST of correct data to login route redirects to home page."""
+    data = {
+        'username': os.environ.get('AUTH_USERNAME', ''),
+        'password': os.environ.get('TEST_PASS', '')
+    }
+    response = testapp.post("/login", data)
+    home = testapp.app.routes_mapper.get_route('home').path
+    assert response.location.endswith(home)
+
+
+def test_logout_route_auth_redirects_to_home(testapp):
+    """Test that the logout route redirects to home page."""
+    response = testapp.get("/logout")
+    home = testapp.app.routes_mapper.get_route('home').path
+    assert response.location.endswith(home)
+
+
+def test_login_post_route_unauth_correct_data_home_has_logout_tab(testapp):
+    """Test that POST of correct data to login route has home page with logout tab."""
+    data = {
+        'username': os.environ.get('AUTH_USERNAME', ''),
+        'password': os.environ.get('TEST_PASS', '')
+    }
+    response = testapp.post("/login", data)
+    next_page = response.follow()
+    assert len(next_page.html.find_all('li', 'nav-item')) == 3
+    assert 'Logout' in str(next_page.html.find_all('li', 'nav-item')[2])
+
+
+def test_logout_route_auth_home_has_login_tab(testapp):
+    """Test that the logout route has home page with login."""
+    response = testapp.get("/logout")
+    next_page = response.follow()
+    assert len(next_page.html.find_all('li', 'nav-item')) == 2
+    assert 'Login' in str(next_page.html.find_all('li', 'nav-item')[1])
+
+
+def test_login_post_route_unauth_correct_data_adds_auth_tkt_cookie(testapp):
+    """Test that POST of correct data to login route adds auth_tkt cookie."""
+    data = {
+        'username': os.environ.get('AUTH_USERNAME', ''),
+        'password': os.environ.get('TEST_PASS', '')
+    }
+    testapp.post("/login", data)
+    assert 'auth_tkt' in testapp.cookies
+
+
+# def test_home_route_auth_gets_200_status_code(testapp):
 #     """Test that the home route gets 200 status code."""
 #     response = testapp.get("/")
 #     assert response.status_code == 200
 
 
-# def test_home_route_has_all_journal_entries(testapp, test_entries):
+# def test_home_route_auth_has_all_journal_entries(testapp, test_entries):
 #     """Test that the home route all journal entries."""
 #     response = testapp.get("/")
 #     assert len(test_entries) == len(response.html.find_all('div', 'card'))
 
 
-# def test_detail_route_has_one_entry(testapp):
+# def test_detail_route_auth_has_one_entry(testapp):
 #     """Test that the detail route shows one journal entry."""
 #     response = testapp.get("/journal/1")
 #     assert len(response.html.find_all('div', 'card')) == 1
 
 
-# def test_detail_route_for_valid_id_gets_200_status_code(testapp):
+# def test_detail_route_auth_for_valid_id_gets_200_status_code(testapp):
 #     """Test that the detail route of a valid gets 200 status code."""
 #     response = testapp.get("/journal/1")
 #     assert response.status_code == 200
 
 
-# def test_detail_route_has_correct_entry(testapp):
+# def test_detail_route_auth_has_correct_entry(testapp):
 #     """Test that the detail route shows correct journal entry."""
 #     response = testapp.get("/journal/1")
 #     assert 'Day 0' in response.html.find('h2')
 
 
-# def test_detail_route_goes_to_404_page_for_invalid_id(testapp):
+# def test_detail_route_auth_goes_to_404_page_for_invalid_id(testapp):
 #     """Test that the detail route redirects to 404 page for invalid id."""
-#     response = testapp.get("/journal/-1", status=404)
+#     response = testapp.get("/journal/100", status=404)
 #     assert 'Oops' in str(response.html.find('h1'))
 
 
-# def test_update_get_route_for_valid_id_gets_200_status_code(testapp):
+# def test_update_get_route_auth_for_valid_id_gets_200_status_code(testapp):
 #     """Test that GET to update route of a valid gets 200 status code."""
 #     response = testapp.get("/journal/1/edit-entry")
 #     assert response.status_code == 200
 
 
-# def test_update_get_route_has_filled_form(testapp):
+# def test_update_get_route_auth_has_filled_form(testapp):
 #     """Test that the Update page has a filled form."""
 #     response = testapp.get("/journal/1/edit-entry")
 #     assert len(response.html.find_all('input', attrs={"type": "text"})) == 1
 #     assert 'value="Day 0"' in str(response.html.find('input', attrs={"type": "text"}))
 
 
-# def test_update_get_route_has_an_update_button(testapp):
+# def test_update_get_route_auth_has_an_update_button(testapp):
 #     """Test that the Update page has a 'Update' button."""
 #     response = testapp.get("/journal/1/edit-entry")
 #     assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
 #     assert "Update" in response.html.find('button', attrs={"type": "submit"})
 
 
-# def test_update_get_route_goes_to_404_page_for_invalid_id(testapp):
+# def test_update_get_route_auth_goes_to_404_page_for_invalid_id(testapp):
 #     """Test that the update GET route redirects to 404 page for invalid id."""
-#     response = testapp.get("/journal/-1/edit-entry", status=404)
+#     response = testapp.get("/journal/100/edit-entry", status=404)
 #     assert 'Oops' in str(response.html.find('h1'))
 
 
-# def test_update_post_route_updates_correct_entry(testapp, testapp_session):
+# def test_update_post_route_auth_updates_correct_entry(testapp, testapp_session):
 #     """Test that POST to update route updates a entry."""
 #     from pyramid_learning_journal.models import Entry
 #     entry_data = {
@@ -559,7 +748,7 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert entry.body != old_entry['body']
 
 
-# def test_update_post_route_has_a_302_status_code(testapp):
+# def test_update_post_route_auth_has_a_302_status_code(testapp):
 #     """Test that POST to update route gets a 302 status code."""
 #     entry_data = {
 #         'title': 'fun times',
@@ -569,7 +758,7 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert response.status_code == 302
 
 
-# def test_update_post_route_redirects_to_detail_route_for_id(testapp):
+# def test_update_post_route_auth_redirects_to_detail_route_for_id(testapp):
 #     """Test that POST to update route redirects to detail for the given id."""
 #     entry_data = {
 #         'title': 'fun times 2',
@@ -580,7 +769,7 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert response.location.endswith(detail)
 
 
-# def test_update_post_route_adds_new_entry_to_home(testapp):
+# def test_update_post_route_auth_adds_new_entry_to_home(testapp):
 #     """Test that the new entry is on the home page after POST to update."""
 #     entry_data = {
 #         'title': 'fun times 4',
@@ -592,34 +781,31 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert entry_data['body'] in str(next_page.html.find('div', 'card-text'))
 
 
-# def test_update_post_route_has_400_error_for_incomplete_data(testapp):
+# def test_update_post_route_auth_has_400_error_for_incomplete_data(testapp):
 #     """Test that POST of incomplete data to update causes 400 error."""
-#     from webtest import AppError
 #     entry_data = {
 #         'title': 'fun times 8'
 #     }
-#     with pytest.raises(AppError) as err:
-#         testapp.post("/journal/1/edit-entry", entry_data)
-#     assert '400' in err.value.args[0]
+#     assert testapp.post("/journal/1/edit-entry", entry_data, status=400)
 
 
-# def test_update_post_route_goes_to_404_page_for_invalid_id(testapp):
+# def test_update_post_route_auth_goes_to_404_page_for_invalid_id(testapp):
 #     """Test that the update POST route redirects to 404 page for invalid id."""
 #     entry_data = {
 #         'title': 'the end',
 #         'body': 'last of the updates.'
 #     }
-#     response = testapp.post("/journal/-1/edit-entry", entry_data, status=404)
+#     response = testapp.post("/journal/100/edit-entry", entry_data, status=404)
 #     assert 'Oops' in str(response.html.find('h1'))
 
 
-# def test_delete_get_route_goes_to_404_page(testapp):
+# def test_delete_get_route_auth_goes_to_404_page(testapp):
 #     """Test that the delete GET route redirects to 404 page."""
 #     response = testapp.get("/journal/1/delete-entry", status=404)
 #     assert 'Oops' in str(response.html.find('h1'))
 
 
-# def test_delete_post_route_deletes_correct_entry(testapp, testapp_session):
+# def test_delete_post_route_auth_deletes_correct_entry(testapp, testapp_session):
 #     """Test that POST to delete route deletes a entry."""
 #     from pyramid_learning_journal.models import Entry
 #     entry = testapp_session.query(Entry).get(1)
@@ -627,28 +813,28 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert entry not in testapp_session.query(Entry).all()
 
 
-# def test_delete_post_route_has_a_302_status_code(testapp):
+# def test_delete_post_route_auth_has_a_302_status_code(testapp):
 #     """Test that POST to delete route gets a 302 status code."""
 #     response = testapp.post("/journal/2/delete-entry")
 #     assert response.status_code == 302
 
 
-# def test_delete_post_route_redirects_to_home_route(testapp):
+# def test_delete_post_route_auth_redirects_to_home_route(testapp):
 #     """Test that POST to delete route redirects to home route."""
 #     response = testapp.post("/journal/3/delete-entry")
 #     home = testapp.app.routes_mapper.get_route('home').path
 #     assert response.location.endswith(home)
 
 
-# def test_delete_post_route_removes_entry_to_home(testapp, test_entries):
+# def test_delete_post_route_auth_removes_entry_to_home(testapp, test_entries):
 #     """Test that the entry is gone from the home page after POST to delete."""
 #     response = testapp.post("/journal/4/delete-entry")
 #     next_page = response.follow()
-#     assert 'Day 3' not in next_page.html.find_all('h2')[-1]
+#     assert 'Day 3' not in next_page.html.find_all('h2')[100]
 #     assert len(next_page.html.find_all('h2')) == len(test_entries) - 4
 
 
-# def test_delete_route_removes_detail_page_for_id(testapp):
+# def test_delete_route_auth_removes_detail_page_for_id(testapp):
 #     """Test that the delete route also removes access to detail page for id."""
 #     testapp.get("/journal/5")
 #     testapp.post("/journal/5/delete-entry")
@@ -657,33 +843,33 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert 'Oops' in str(response.html.find('h1'))
 
 
-# def test_delete_post_route_goes_to_404_page_for_invalid_id(testapp):
+# def test_delete_post_route_auth_goes_to_404_page_for_invalid_id(testapp):
 #     """Test that the delete POST route redirects to 404 page for invalid id."""
-#     response = testapp.post("/journal/-1/delete-entry", status=404)
+#     response = testapp.post("/journal/100/delete-entry", status=404)
 #     assert 'Oops' in str(response.html.find('h1'))
 
 
-# def test_create_get_route_gets_200_status_code(testapp):
+# def test_create_get_route_auth_gets_200_status_code(testapp):
 #     """Test that GET to create route gets 200 status code."""
 #     response = testapp.get("/journal/new-entry")
 #     assert response.status_code == 200
 
 
-# def test_create_get_route_has_empty_form(testapp):
+# def test_create_get_route_auth_has_empty_form(testapp):
 #     """Test that the Create page has an empty form."""
 #     response = testapp.get("/journal/new-entry")
 #     assert len(response.html.find_all('input', attrs={"type": "text"})) == 1
 #     assert 'value' not in response.html.find('input', attrs={"type": "text"})
 
 
-# def test_create_get_route_has_a_create_button(testapp):
+# def test_create_get_route_auth_has_a_create_button(testapp):
 #     """Test that the Create page has a 'Create' button."""
 #     response = testapp.get("/journal/new-entry")
 #     assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
 #     assert "Create" in response.html.find('button', attrs={"type": "submit"})
 
 
-# def test_create_post_route_adds_a_new_entry(testapp, empty_the_db, testapp_session):
+# def test_create_post_route_auth_adds_a_new_entry(testapp, empty_the_db, testapp_session):
 #     """Test that POST to create route creates a new entry."""
 #     from pyramid_learning_journal.models import Entry
 #     assert len(testapp_session.query(Entry).all()) == 0
@@ -695,7 +881,7 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert len(testapp_session.query(Entry).all()) == 1
 
 
-# def test_create_post_route_has_a_302_status_code(testapp, empty_the_db):
+# def test_create_post_route_auth_has_a_302_status_code(testapp, empty_the_db):
 #     """Test that POST to create route gets a 302 status code."""
 #     entry_data = {
 #         'title': 'fun times',
@@ -705,7 +891,7 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert response.status_code == 302
 
 
-# def test_create_post_route_redirects_to_home_route(testapp, empty_the_db):
+# def test_create_post_route_auth_redirects_to_home_route(testapp, empty_the_db):
 #     """Test that POST to create route redirects to home route."""
 #     entry_data = {
 #         'title': 'fun times',
@@ -716,7 +902,7 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert response.location.endswith(home)
 
 
-# def test_create_post_route_adds_new_entry_to_home(testapp, empty_the_db):
+# def test_create_post_route_auth_adds_new_entry_to_home(testapp, empty_the_db):
 #     """Test that the new entry is on the home page after POST to create."""
 #     entry_data = {
 #         'title': 'fun times',
@@ -728,11 +914,9 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert entry_data['body'] in str(next_page.html.find('div', 'card-text'))
 
 
-# def test_create_post_route_allows_access_to_detail_page(testapp, empty_the_db):
+# def test_create_post_route_auth_allows_access_to_detail_page(testapp, empty_the_db):
 #     """Test that the new entry has an available detail page."""
-#     from webtest import AppError
-#     with pytest.raises(AppError):
-#         testapp.get("/journal/1")
+#     assert testapp.get("/journal/1", status=404)
 
 #     entry_data = {
 #         'title': 'fun times',
@@ -742,7 +926,7 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     testapp.get("/journal/1")
 
 
-# def test_create_post_route_new_detail_page_has_new_info(testapp, empty_the_db):
+# def test_create_post_route_auth_new_detail_page_has_new_info(testapp, empty_the_db):
 #     """Test that the detail page for new entry has the correct info."""
 #     entry_data = {
 #         'title': 'fun times',
@@ -754,12 +938,15 @@ def test_logout_redirects_to_home_with_httpfound(dummy_request):
 #     assert entry_data['body'] in str(response.html.find('div', 'card-text'))
 
 
-# def test_create_post_route_has_400_error_for_incomplete_data(testapp):
+# def test_create_post_route_auth_has_400_error_for_incomplete_data(testapp):
 #     """Test that POST of incomplete data to create causes 400 error."""
-#     from webtest import AppError
 #     entry_data = {
 #         'title': 'fun times'
 #     }
-#     with pytest.raises(AppError) as err:
-#         testapp.post("/journal/new-entry", entry_data)
-#     assert '400' in err.value.args[0]
+#     assert testapp.post("/journal/new-entry", entry_data, status=400)
+
+
+def test_logout_route_auth_removes_auth_tkt_cookie(testapp):
+    """Test that the logout route removes the auth_tkt cookie."""
+    testapp.get("/logout")
+    assert 'auth_tkt' not in testapp.cookies
