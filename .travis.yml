@@ -18,7 +18,10 @@ install:
 
 # commands to run tests
 script:
-  - pytest
+  - pytest --cov pyramid_learning_journal
+
+after_success:
+  - coveralls
 
 notifications:
   email: false
