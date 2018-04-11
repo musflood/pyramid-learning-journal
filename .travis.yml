@@ -6,11 +6,11 @@ services:
   - postgresql
 
 before_script:
-  - psql -c "create database test-learning-journal;" -U postgres
+  - psql -c "create database test_learning_journal;" -U postgres
 
 #set some environment variables
 env:
-  - TEST_DATABASE_URL='postgres://127.0.0.1:5432/test-learning-journal'
+  - TEST_DATABASE_URL='postgres://127.0.0.1:5432/test_learning_journal'
 
 # command to install dependencies
 install:
