@@ -1,5 +1,8 @@
 # Pyramid Learning Journal
 
+[![Build Status](https://travis-ci.org/musflood/pyramid-learning-journal.svg?branch=master)](https://travis-ci.org/musflood/pyramid-learning-journal)
+[![Coverage Status](https://coveralls.io/repos/github/musflood/pyramid-learning-journal/badge.svg?branch=master)](https://coveralls.io/github/musflood/pyramid-learning-journal?branch=master)
+
 **Author**: Megan Flood
 
 **Version**: 5.0.0
@@ -96,6 +99,7 @@ For testing in both Python 2 and 3, use the `tox` command instead.
 
 | Date | &emsp;
 | :--- | ---
+|**4-11-2018 2:09pm** | Travis and Coveralls automated testing implemented.<br><sup>100% coverage on Python 2 and 3.</sup>
 |**11-11-2017 9:58pm** | CSRF tokens now required for all POST requests.<br><sup>100% coverage on Python 2 and 3.</sup>
 |**11-11-2017 7:49pm** | Added authorization and authentication for creating, updating, and deleting entries.<br><sup>100% coverage on Python 2 and 3.</sup>
 |**11-5-2017 5:20pm** | Added functionality to forms to update and create entries.<br><sup>100% coverage on Python 2 and 3.</sup>
