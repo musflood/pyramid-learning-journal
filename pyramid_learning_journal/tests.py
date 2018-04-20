@@ -574,21 +574,32 @@ def test_login_get_route_unauth_gets_200_status_code(testapp):
 def test_login_get_route_unauth_has_login_form(testapp):
     """Test that the login GET route gets 200 status code."""
     response = testapp.get("/login")
-    assert len(response.html.find_all('input')) == 2
-    assert 'Username' in str(response.html.find('input'))
+    assert len(response.html.find_all('input')) == 3
+    assert 'Username' in str(response.html.find('input', {'name': 'username'}))
 
 
-def test_login_post_route_unauth_incompelete_data_has_400_error(testapp):
+def test_login_post_route_unauth_incompelete_data_has_400_error(testapp, csrf_token):
     """Test that POST of incomplete data to login route gets a 400 error."""
     data = {
+        'csrf_token': csrf_token,
         'username': 'jack'
     }
     assert testapp.post("/login", data, status=400)
 
 
-def test_login_post_route_unauth_wrong_data_has_200_status_code(testapp):
+def test_login_post_route_unauth_has_400_error_for_missing_csrf_token(testapp):
+    """Test that POST with missing csrf_token to login causes 400 error."""
+    data = {
+        'username': 'jack',
+        'password': 'work'
+    }
+    assert testapp.post("/login", data, status=400)
+
+
+def test_login_post_route_unauth_wrong_data_has_200_status_code(testapp, csrf_token):
     """Test that POST of wrong data to login route gets a 200 status code."""
     data = {
+        'csrf_token': csrf_token,
         'username': 'jack',
         'password': 'work'
     }
@@ -596,9 +607,10 @@ def test_login_post_route_unauth_wrong_data_has_200_status_code(testapp):
     assert response.status_code == 200
 
 
-def test_login_post_route_unauth_wrong_data_has_error_message(testapp):
+def test_login_post_route_unauth_wrong_data_has_error_message(testapp, csrf_token):
     """Test that POST of wrong data to login route has an error message."""
     data = {
+        'csrf_token': csrf_token,
         'username': 'jack',
         'password': 'work'
     }
@@ -606,9 +618,10 @@ def test_login_post_route_unauth_wrong_data_has_error_message(testapp):
     assert 'incorrect' in str(response.html.find('div', 'alert'))
 
 
-def test_login_post_route_unauth_correct_data_has_302_status_code(testapp, username, password):
+def test_login_post_route_unauth_correct_data_has_302_status_code(testapp, csrf_token, username, password):
     """Test that POST of correct data to login route has 302 status code."""
     data = {
+        'csrf_token': csrf_token,
         'username': username,
         'password': password
     }
@@ -622,9 +635,10 @@ def test_logout_route_auth_gets_302_status_code(testapp):
     assert response.status_code == 302
 
 
-def test_login_post_route_unauth_correct_data_redirects_to_home(testapp, username, password):
+def test_login_post_route_unauth_correct_data_redirects_to_home(testapp, csrf_token, username, password):
     """Test that POST of correct data to login route redirects to home page."""
     data = {
+        'csrf_token': csrf_token,
         'username': username,
         'password': password
     }
@@ -640,9 +654,10 @@ def test_logout_route_auth_redirects_to_home(testapp):
     assert response.location.endswith(home)
 
 
-def test_login_post_route_unauth_correct_data_home_has_logout_tab(testapp, username, password):
+def test_login_post_route_unauth_correct_data_home_has_logout_tab(testapp, csrf_token, username, password):
     """Test that POST of correct data to login route has home page with logout tab."""
     data = {
+        'csrf_token': csrf_token,
         'username': username,
         'password': password
     }
@@ -660,9 +675,10 @@ def test_logout_route_auth_home_has_login_tab(testapp):
     assert 'Login' in str(next_page.html.find_all('li', 'nav-item')[1])
 
 
-def test_login_post_route_unauth_correct_data_adds_auth_tkt_cookie(testapp, username, password):
+def test_login_post_route_unauth_correct_data_adds_auth_tkt_cookie(testapp, csrf_token, username, password):
     """Test that POST of correct data to login route adds auth_tkt cookie."""
     data = {
+        'csrf_token': csrf_token,
         'username': username,
         'password': password
     }
@@ -698,31 +714,36 @@ def test_login_get_route_auth_keeps_auth_tkt_cookie(testapp):
     assert 'auth_tkt' in testapp.cookies
 
 
-def test_login_post_route_auth_has_302_status_code(testapp):
+def test_login_post_route_auth_has_400_error_for_missing_csrf_token(testapp):
+    """Test that POST with missing csrf_token to login causes 400 error."""
+    assert testapp.post("/login", status=400)
+
+
+def test_login_post_route_auth_has_302_status_code(testapp, csrf_token):
     """Test that POST to login route has 302 status code."""
-    response = testapp.post("/login")
+    response = testapp.post("/login", {'csrf_token': csrf_token})
     assert response.status_code == 302
 
 
-def test_login_post_route_auth_redirects_to_home(testapp):
+def test_login_post_route_auth_redirects_to_home(testapp, csrf_token):
     """Test that POST to login route redirects to home page."""
-    response = testapp.post("/login")
+    response = testapp.post("/login", {'csrf_token': csrf_token})
     home = testapp.app.routes_mapper.get_route('home').path
     assert response.location.endswith(home)
 
 
-def test_login_post_route_auth_home_still_has_logout_tab(testapp):
+def test_login_post_route_auth_home_still_has_logout_tab(testapp, csrf_token):
     """Test that POST to login route has home page with logout tab."""
-    response = testapp.post("/login")
+    response = testapp.post("/login", {'csrf_token': csrf_token})
     next_page = response.follow()
     assert len(next_page.html.find_all('li', 'nav-item')) == 3
     assert 'Logout' in str(next_page.html.find_all('li', 'nav-item')[2])
 
 
-def test_login_post_route_auth_keeps_auth_tkt_cookie(testapp):
+def test_login_post_route_auth_keeps_auth_tkt_cookie(testapp, csrf_token):
     """Test that POST to login route adds auth_tkt cookie."""
     assert 'auth_tkt' in testapp.cookies
-    testapp.post("/login")
+    testapp.post("/login", {'csrf_token': csrf_token})
     assert 'auth_tkt' in testapp.cookies
 
 
@@ -778,7 +799,7 @@ def test_update_get_route_auth_has_filled_form(testapp):
 def test_update_get_route_auth_has_an_update_button(testapp):
     """Test that the Update page has a 'Update' button."""
     response = testapp.get("/journal/1/edit-entry")
-    assert len(response.html.find_all('button', attrs={"type": "submit"})) == 1
+    assert len(response.html.find_all('button', attrs={"type": "submit"})) == 2
     assert "Update" in response.html.find('button', attrs={"type": "submit"})
 
 
@@ -788,10 +809,11 @@ def test_update_get_route_auth_goes_to_404_page_for_invalid_id(testapp):
     assert 'Oops' in str(response.html.find('h1'))
 
 
-def test_update_post_route_auth_updates_correct_entry(testapp, testapp_session):
+def test_update_post_route_auth_updates_correct_entry(testapp, testapp_session, csrf_token):
     """Test that POST to update route updates a entry."""
     from pyramid_learning_journal.models import Entry
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'so it begins',
         'body': 'the beginning of change'
     }
@@ -804,9 +826,10 @@ def test_update_post_route_auth_updates_correct_entry(testapp, testapp_session):
     assert entry.body != old_entry['body']
 
 
-def test_update_post_route_auth_has_a_302_status_code(testapp):
+def test_update_post_route_auth_has_a_302_status_code(testapp, csrf_token):
     """Test that POST to update route gets a 302 status code."""
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times',
         'body': 'all the fun, all the time.'
     }
@@ -814,9 +837,10 @@ def test_update_post_route_auth_has_a_302_status_code(testapp):
     assert response.status_code == 302
 
 
-def test_update_post_route_auth_redirects_to_detail_route_for_id(testapp):
+def test_update_post_route_auth_redirects_to_detail_route_for_id(testapp, csrf_token):
     """Test that POST to update route redirects to detail for the given id."""
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times 2',
         'body': 'all the fun, all the time. x 2'
     }
@@ -825,9 +849,10 @@ def test_update_post_route_auth_redirects_to_detail_route_for_id(testapp):
     assert response.location.endswith(detail)
 
 
-def test_update_post_route_auth_adds_new_entry_to_home(testapp):
+def test_update_post_route_auth_adds_new_entry_to_home(testapp, csrf_token):
     """Test that the new entry is on the home page after POST to update."""
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times 4',
         'body': 'all the fun, all the time. x 4'
     }
@@ -837,17 +862,28 @@ def test_update_post_route_auth_adds_new_entry_to_home(testapp):
     assert entry_data['body'] in str(next_page.html.find('div', 'card-text'))
 
 
-def test_update_post_route_auth_has_400_error_for_incomplete_data(testapp):
+def test_update_post_route_auth_has_400_error_for_incomplete_data(testapp, csrf_token):
     """Test that POST of incomplete data to update causes 400 error."""
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times 8'
     }
     assert testapp.post("/journal/1/edit-entry", entry_data, status=400)
 
 
-def test_update_post_route_auth_goes_to_404_page_for_invalid_id(testapp):
+def test_update_post_route_auth_has_400_error_for_missing_csrf_token(testapp):
+    """Test that POST with missing csrf_token to update causes 400 error."""
+    entry_data = {
+        'title': 'fun times 16',
+        'body': 'all the fun, all the time. x 16'
+    }
+    assert testapp.post("/journal/1/edit-entry", entry_data, status=400)
+
+
+def test_update_post_route_auth_goes_to_404_page_for_invalid_id(testapp, csrf_token):
     """Test that the update POST route redirects to 404 page for invalid id."""
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'the end',
         'body': 'last of the updates.'
     }
@@ -861,47 +897,52 @@ def test_delete_get_route_auth_goes_to_404_page(testapp):
     assert 'Oops' in str(response.html.find('h1'))
 
 
-def test_delete_post_route_auth_deletes_correct_entry(testapp, testapp_session):
+def test_delete_post_route_auth_has_400_error_for_missing_csrf_token(testapp):
+    """Test that POST with missing csrf_token to delete causes 400 error."""
+    assert testapp.post("/journal/1/delete-entry", status=400)
+
+
+def test_delete_post_route_auth_deletes_correct_entry(testapp, testapp_session, csrf_token):
     """Test that POST to delete route deletes a entry."""
     from pyramid_learning_journal.models import Entry
     entry = testapp_session.query(Entry).get(1)
-    testapp.post("/journal/1/delete-entry")
+    testapp.post("/journal/1/delete-entry", {'csrf_token': csrf_token})
     assert entry not in testapp_session.query(Entry).all()
 
 
-def test_delete_post_route_auth_has_a_302_status_code(testapp):
+def test_delete_post_route_auth_has_a_302_status_code(testapp, csrf_token):
     """Test that POST to delete route gets a 302 status code."""
-    response = testapp.post("/journal/2/delete-entry")
+    response = testapp.post("/journal/2/delete-entry", {'csrf_token': csrf_token})
     assert response.status_code == 302
 
 
-def test_delete_post_route_auth_redirects_to_home_route(testapp):
+def test_delete_post_route_auth_redirects_to_home_route(testapp, csrf_token):
     """Test that POST to delete route redirects to home route."""
-    response = testapp.post("/journal/3/delete-entry")
+    response = testapp.post("/journal/3/delete-entry", {'csrf_token': csrf_token})
     home = testapp.app.routes_mapper.get_route('home').path
     assert response.location.endswith(home)
 
 
-def test_delete_post_route_auth_removes_entry_from_home(testapp, test_entries):
+def test_delete_post_route_auth_removes_entry_from_home(testapp, test_entries, csrf_token):
     """Test that the entry is gone from the home page after POST to delete."""
-    response = testapp.post("/journal/4/delete-entry")
+    response = testapp.post("/journal/4/delete-entry", {'csrf_token': csrf_token})
     next_page = response.follow()
     assert 'Day 3' not in next_page.html.find_all('h2')[-1]
     assert len(next_page.html.find_all('h2')) == len(test_entries) - 4
 
 
-def test_delete_route_auth_removes_detail_page_for_id(testapp):
+def test_delete_route_auth_removes_detail_page_for_id(testapp, csrf_token):
     """Test that the delete route also removes access to detail page for id."""
     testapp.get("/journal/5")
-    testapp.post("/journal/5/delete-entry")
+    testapp.post("/journal/5/delete-entry", {'csrf_token': csrf_token})
 
     response = testapp.get("/journal/5", status=404)
     assert 'Oops' in str(response.html.find('h1'))
 
 
-def test_delete_post_route_auth_goes_to_404_page_for_invalid_id(testapp):
+def test_delete_post_route_auth_goes_to_404_page_for_invalid_id(testapp, csrf_token):
     """Test that the delete POST route redirects to 404 page for invalid id."""
-    response = testapp.post("/journal/100/delete-entry", status=404)
+    response = testapp.post("/journal/100/delete-entry", {'csrf_token': csrf_token}, status=404)
     assert 'Oops' in str(response.html.find('h1'))
 
 
@@ -925,11 +966,12 @@ def test_create_get_route_auth_has_a_create_button(testapp):
     assert "Create" in response.html.find('button', attrs={"type": "submit"})
 
 
-def test_create_post_route_auth_adds_a_new_entry(testapp, empty_the_db, testapp_session):
+def test_create_post_route_auth_adds_a_new_entry(testapp, empty_the_db, testapp_session, csrf_token):
     """Test that POST to create route creates a new entry."""
     from pyramid_learning_journal.models import Entry
     assert len(testapp_session.query(Entry).all()) == 0
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times',
         'body': 'all the fun, all the time.'
     }
@@ -937,9 +979,10 @@ def test_create_post_route_auth_adds_a_new_entry(testapp, empty_the_db, testapp_
     assert len(testapp_session.query(Entry).all()) == 1
 
 
-def test_create_post_route_auth_has_a_302_status_code(testapp, empty_the_db):
+def test_create_post_route_auth_has_a_302_status_code(testapp, empty_the_db, csrf_token):
     """Test that POST to create route gets a 302 status code."""
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times',
         'body': 'all the fun, all the time.'
     }
@@ -947,9 +990,10 @@ def test_create_post_route_auth_has_a_302_status_code(testapp, empty_the_db):
     assert response.status_code == 302
 
 
-def test_create_post_route_auth_redirects_to_home_route(testapp, empty_the_db):
+def test_create_post_route_auth_redirects_to_home_route(testapp, empty_the_db, csrf_token):
     """Test that POST to create route redirects to home route."""
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times',
         'body': 'all the fun, all the time.'
     }
@@ -958,9 +1002,10 @@ def test_create_post_route_auth_redirects_to_home_route(testapp, empty_the_db):
     assert response.location.endswith(home)
 
 
-def test_create_post_route_auth_adds_new_entry_to_home(testapp, empty_the_db):
+def test_create_post_route_auth_adds_new_entry_to_home(testapp, empty_the_db, csrf_token):
     """Test that the new entry is on the home page after POST to create."""
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times',
         'body': 'all the fun, all the time.'
     }
@@ -970,11 +1015,12 @@ def test_create_post_route_auth_adds_new_entry_to_home(testapp, empty_the_db):
     assert entry_data['body'] in str(next_page.html.find('div', 'card-text'))
 
 
-def test_create_post_route_auth_allows_access_to_detail_page(testapp, empty_the_db):
+def test_create_post_route_auth_allows_access_to_detail_page(testapp, empty_the_db, csrf_token):
     """Test that the new entry has an available detail page."""
     assert testapp.get("/journal/1", status=404)
 
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times',
         'body': 'all the fun, all the time.'
     }
@@ -982,9 +1028,10 @@ def test_create_post_route_auth_allows_access_to_detail_page(testapp, empty_the_
     testapp.get("/journal/1")
 
 
-def test_create_post_route_auth_new_detail_page_has_new_info(testapp, empty_the_db):
+def test_create_post_route_auth_new_detail_page_has_new_info(testapp, empty_the_db, csrf_token):
     """Test that the detail page for new entry has the correct info."""
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times',
         'body': 'all the fun, all the time.'
     }
@@ -994,10 +1041,20 @@ def test_create_post_route_auth_new_detail_page_has_new_info(testapp, empty_the_
     assert entry_data['body'] in str(response.html.find('div', 'card-text'))
 
 
-def test_create_post_route_auth_has_400_error_for_incomplete_data(testapp):
+def test_create_post_route_auth_has_400_error_for_incomplete_data(testapp, csrf_token):
     """Test that POST of incomplete data to create causes 400 error."""
     entry_data = {
+        'csrf_token': csrf_token,
         'title': 'fun times'
+    }
+    assert testapp.post("/journal/new-entry", entry_data, status=400)
+
+
+def test_create_post_route_auth_has_400_error_for_missing_csrf_token(testapp):
+    """Test that POST with missing csrf_token to create causes 400 error."""
+    entry_data = {
+        'title': 'fun times',
+        'body': 'all the fun, all the time.'
     }
     assert testapp.post("/journal/new-entry", entry_data, status=400)
 

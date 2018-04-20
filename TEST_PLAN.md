@@ -130,6 +130,8 @@
      * Unauthenticated:
          - 403 forbidden
      * Authenticated:
+         * Given missing CSRF token, has error
+             - response has 400 status code
          * Given incomplete data, has error
              - response has 400 status code
          * Given complete data:
@@ -159,6 +161,8 @@
          * Given invalid id, directs to 404 page
              - response has 404 status code
              - has h1 tag with 'Oops'
+         * Given missing CSRF token, has error
+             - response has 400 status code
          * Given incomplete data, has error
              - response has 400 status code
          * Given complete data:
@@ -182,6 +186,8 @@
          * Given invalid id, directs to 404 page
              - response has 404 status code
              - has h1 tag with 'Oops'
+         * Given missing CSRF token, has error
+             - response has 400 status code
          * Given valid id:
              - Entry object with id is deleted
              - response has 302 code
@@ -201,6 +207,8 @@
          * home page still has logout button and create button
  - POST
      + Unauthenticated:
+         * Given missing CSRF token, has error
+             - response has 400 status code
          * Given incomplete data, has error
              - response has 400 status code
          * Given complete incorrect data
@@ -212,6 +220,8 @@
              - home page now has logout avaiable
              - user now has auth_tkt cookie
      + Authenticated:
+         * Given missing CSRF token, has error
+             - response has 400 status code
          * reponse has 302 code
          * redirects to home page
          * user is still authenticated

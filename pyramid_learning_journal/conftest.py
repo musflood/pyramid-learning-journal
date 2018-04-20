@@ -158,3 +158,10 @@ def password():
     """Set the password for testing purposes."""
     os.environ['AUTH_PASSWORD'] = pwd_context.hash('password')
     return 'password'
+
+
+@pytest.fixture(scope='session')
+def csrf_token(testapp):
+    """Get the CSRF token for POST requests."""
+    response = testapp.get('/login')
+    return response.html.find('input', {'name': 'csrf_token'}).attrs['value']
