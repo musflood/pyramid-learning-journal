@@ -2,6 +2,7 @@
 
 {% block content %}
     <form method='POST'>
+        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
         <div class="card mb-3">
             <div class="card-header bg-white">
                 <input type="text" name="title" placeholder="Title" value="{{ entry.title }}" class="form-control border-light bg-light" required>
@@ -17,12 +18,11 @@
 
             <div class="w-100 d-sm-none pb-4 pb-sm-0"></div>
 
-            <a class="col-4 col-sm-auto trash" ping="{{ request.route_url('delete', id=entry.id) }}" href="{{ request.route_url('home') }}">
-                <button type="button" name="delete" class="btn btn-outline-danger btn-sm col col-sm-auto trash">
-                    <span class="d-inline d-sm-none">Delete</span>
-                    <span class="ion-ios-trash-outline d-none d-sm-inline"></span>
-                </button>
-            </a>
+            <button type="submit" formaction="{{ request.route_url('delete', id=entry.id) }}" name="delete" class="btn btn-outline-danger btn-sm col-4 col-sm-auto trash">
+                <span class="d-inline d-sm-none">Delete</span>
+                <span class="ion-ios-trash-outline d-none d-sm-inline"></span>
+            </button>
+
         </div>
     </form>
 {% endblock content %}
