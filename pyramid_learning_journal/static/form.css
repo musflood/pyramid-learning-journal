@@ -1,0 +1,30 @@
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255,193,7,.5);
+    border-color: #ffc107 !important;
+}
+
+input[name="title"] {
+    font-family: 'Poiret One', cursive;
+    font-weight: 800;
+    font-size: 2rem;
+}
+
+textarea[name="body"] {
+    min-height: 50vh
+}
+
+@media screen and (min-width: 576px) {
+
+    textarea[name="body"] {
+        min-height: 30vh
+    }
+
+    button.trash, a.trash {
+        font-size: 1.5rem;
+        padding: 0rem .7rem;
+        border-radius: 50%;
+        position: absolute;
+        right: 0.2rem;
+    }
+
+}

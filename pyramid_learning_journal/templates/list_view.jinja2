@@ -1,0 +1,18 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    {% for entry in entries %}
+         <div class="card mb-5">
+            <div class="card-header bg-white">
+                <h2 class="card-title mb-1">{{ entry.title }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="card-text mb-3">
+                    {{ entry.body|safe }}
+                </div>         
+                <time class="card-subtitle text-muted float-left d-sm-inline pb-3 pb-sm-0">{{ entry.creation_date }}</time>
+                <a href="{{ request.route_url('detail', id=entry.id) }}" class="btn btn-outline-warning float-right col col-sm-auto">Read more</a>
+            </div>
+        </div> <!-- end of card -->
+    {% endfor %}
+{% endblock content %}

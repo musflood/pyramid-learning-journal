@@ -1,0 +1,21 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ request.session.get_csrf_token() }}">
+        <div class="card mb-3">
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                  {{ error }}
+                </div>
+                {% endif %}
+                <input type="text" name="username" placeholder="Username" class="form-control border-light bg-light mb-3" required>
+                <input type="password" name="password" placeholder="Password" class="form-control border-light bg-light" required>
+            </div>
+        </div> <!-- end of card -->
+        <div class="row justify-content-center mx-0">
+            <button type="submit" class="btn btn-warning col col-sm-4">Login</button>
+        </div>
+    </form>
+{% endblock content %}

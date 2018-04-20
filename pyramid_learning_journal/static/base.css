@@ -1,0 +1,21 @@
+html {
+    min-height: 100%;
+    position: relative;
+}
+
+body {
+    font-family: 'Maven Pro', sans-serif;
+}
+
+h1, h2 {
+    font-family: 'Poiret One', cursive;
+    font-weight: 800;
+}
+
+h6 {
+    font-weight: 400; 
+}
+
+button {
+    cursor: pointer;
+}
